@@ -299,7 +299,7 @@ footer{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:0 30px;c
   </div>
 </nav>
 <main id="main"></main>
-<footer>Herramienta didáctica de escandallos · Escuela de Hostelería San Roque · Las recetas no se guardan: descarga el PDF antes de cerrar.</footer>
+<footer>Herramienta didáctica de escandallos · Escuela de Hostelería San Roque · Las recetas se guardan solo en este dispositivo (sin fotos).</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -401,8 +401,32 @@ function pedirPin(onOk,titulo){
     if(inp.value===PIN){ desbloqueado=true; close(); onOk&&onOk(); }
     else { bg.querySelector('#pin-err').textContent='Código incorrecto'; inp.value=''; inp.focus(); } });
 }
-function save(){ hayCambios=true; }
-window.addEventListener('beforeunload',e=>{ if(S.recetas.some(r=>!r.ejemplo&&!r.pdfOk)||ingDirty){ e.preventDefault(); e.returnValue=''; } });
+/* Recetas guardadas en este dispositivo (sin fotos; solo una miniatura pequeña) */
+const KEY_REC='ehsr-escandallos-mis-recetas-v1';
+let saveRecT=null, avisoEspacio=false;
+function serializarRecetas(){
+  return S.recetas.filter(r=>!r.ejemplo).map(r=>{ const c=JSON.parse(JSON.stringify({...r,fotos:[]}));
+    c.lineas=c.lineas.map(l=>({...l,nombre:refName(l)})); return c; });
+}
+function guardarRecetas(){
+  try{ localStorage.setItem(KEY_REC,JSON.stringify({v:1,settings:{alumno:S.settings.alumno||'',curso:S.settings.curso||''},recetas:serializarRecetas()})); }
+  catch(e){ if(!avisoEspacio){ avisoEspacio=true; toast('No queda espacio en este dispositivo para guardar más recetas. Borra alguna antigua.'); } }
+}
+function save(){ hayCambios=true; clearTimeout(saveRecT); saveRecT=setTimeout(guardarRecetas,400); }
+function cargarRecetas(){
+  let d=null; try{ d=JSON.parse(localStorage.getItem(KEY_REC)||'null'); }catch(e){}
+  if(!d||!Array.isArray(d.recetas)) return;
+  if(d.settings){ S.settings.alumno=d.settings.alumno||''; S.settings.curso=d.settings.curso||''; }
+  for(const r of d.recetas){
+    r.fotos=[]; r.lineas=(r.lineas||[]).map(l=>{ const ref=l.ref||'';
+      if(ref.startsWith('i:')&&!ingById(ref.slice(2))){ const m=S.ingredientes.find(x=>norm(x.nombre)===norm(l.nombre||'')); return {...l,ref:m?'i:'+m.id:(l.nombre?'?:'+l.nombre:'')}; }
+      return l; });
+    S.recetas.push(r);
+  }
+  S.recetas.forEach(r=>r.lineas.forEach(l=>{ const ref=l.ref||''; if(ref.startsWith('r:')&&!recById(ref.slice(2))) l.ref=l.nombre?'?:'+l.nombre:''; delete l.nombre; }));
+}
+function miniatura(dataUrl){ return new Promise(res=>{ const img=new Image(); img.onload=()=>{ const max=320, sc=Math.min(1,max/Math.max(img.width,img.height)); const c=document.createElement('canvas'); c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc); c.getContext('2d').drawImage(img,0,0,c.width,c.height); res(c.toDataURL('image/jpeg',0.7)); }; img.onerror=()=>res(''); img.src=dataUrl; }); }
+window.addEventListener('beforeunload',e=>{ if(saveRecT){ clearTimeout(saveRecT); guardarRecetas(); } if(ingDirty){ e.preventDefault(); e.returnValue=''; } });
 const fotoSrc = f=> f? String(f) : '';
 async function putFoto(dataUrl){ return dataUrl; }
 function delFoto(){}
@@ -482,7 +506,7 @@ function counts(){
 function render(){
   counts();
   const m=$('#main');
-  const notice = '<div class="notice" style="font-weight:500"><b>Las recetas y fotos no se guardan en la app.</b> Cuando termines, pulsa «Descargar PDF» en cada receta. Al cerrar o recargar la página se borran.</div>';
+  const notice = '<div class="notice" style="font-weight:500"><b>Tus recetas se guardan en este dispositivo, pero las fotos no.</b> Cuando termines, pulsa «Descargar PDF» para tener la ficha completa con fotos.</div>';
   if(ui.tab==='recetario') m.innerHTML=vRecetario();
   else if(ui.tab==='ficha'&&ui.ficha&&recById(ui.ficha)) { m.innerHTML=notice+vFicha(recById(ui.ficha)); }
   else if(ui.tab==='ingredientes') m.innerHTML=notice+vIngredientes();
@@ -512,10 +536,10 @@ function vRecetario(){
   <div class="steps3">
     <div class="st"><span class="n">1</span><div><b>Ingredientes</b><p>Escribe y elige de la lista. El coste se calcula solo.</p></div></div>
     <div class="st"><span class="n">2</span><div><b>Precio y fotos</b><p>Pon el PVP y haz la foto del postre terminado.</p></div></div>
-    <div class="st"><span class="n">3</span><div><b>Descarga el PDF</b><p>Guárdalo o envíalo antes de cerrar: la app no guarda recetas.</p></div></div>
+    <div class="st"><span class="n">3</span><div><b>Descarga el PDF</b><p>Tu receta se guarda en este dispositivo; las fotos no, así que descarga el PDF con ellas.</p></div></div>
   </div>
-  ${mias.length?`<div class="group"><h2>Tus recetas de hoy</h2>
-    ${pend?`<div class="notice" style="margin-bottom:12px">Tienes ${pend===1?'1 receta':pend+' recetas'} sin descargar en PDF. Si cierras la página, se perderán.</div>`:''}
+  ${mias.length?`<div class="group"><h2>Mis recetas</h2><div class="sub" style="margin:-4px 0 10px">Guardadas en este dispositivo (${mias.length}). Las fotos no se guardan: si reabres una receta, vuelve a añadirlas antes de descargar el PDF.</div>
+    ${pend?`<div class="notice" style="margin-bottom:12px">Tienes ${pend===1?'1 receta':pend+' recetas'} sin descargar en PDF.</div>`:''}
     <div class="cards">${mias.map(card).join('')}</div></div>`:''}
   ${ej.length?`<div class="group"><h2>Recetas de ejemplo</h2><div class="sub" style="margin:-4px 0 10px">Ábrelas para ver cómo se rellena una ficha técnica completa.</div><div class="cards">${ej.map(card).join('')}</div></div>`:''}
   </section>`;
@@ -526,7 +550,7 @@ function card(r){
   const fcp = s.fc!=null? `<span class="pill ${fcClass(s.fc,s.obj)}">${pct(s.fc)}</span>`:'<b>—</b>';
   const rend=0;
   return `<button class="card" data-open="${r.id}">
-    ${(r.fotos||[]).length&&fotoSrc(r.fotos[0])?`<img class="thumb" src="${fotoSrc(r.fotos[0])}" alt="">`:''}
+    ${(r.fotos||[]).length&&fotoSrc(r.fotos[0])?`<img class="thumb" src="${fotoSrc(r.fotos[0])}" alt="">`:(r.mini?`<img class="thumb" src="${r.mini}" alt="">`:'')}
     <div><div class="t">${esc(r.nombre||'Receta sin nombre')}</div><div class="who">${esc(r.alumno||'Sin autor')}${r.fecha?' · '+esc(new Date(r.fecha).toLocaleDateString('es-ES')):''}</div></div>
     <div>${est}${r.ejemplo?' <span class="pill neutral">Ejemplo</span>':(r.pdfOk?' <span class="pill ok">PDF descargado ✓</span>':' <span class="pill warn">PDF pendiente</span>')}${rend?' <span class="pill neutral">Elaboración base · '+fmt(rend,0)+' g</span>':''}</div>
     <div class="figs num"><div class="fig"><small>Coste ración</small><b>${s.falta.length?'—':eur(s.racion)}</b></div><div class="fig"><small>PVP</small><b>${eur(s.pvp)}</b></div><div class="fig"><small>% coste</small>${s.falta.length?'<b>—</b>':fcp}</div></div>
@@ -586,7 +610,7 @@ function vFicha(r){
         <div class="alg">${ALERGENOS.map((a,i)=>`<label><input type="checkbox" id="alg-${i}" data-alg="${esc(a)}" ${r.alergenos.includes(a)?'checked':''}>${esc(a)}</label>`).join('')}</div>
       </div>
       <div class="panel"><h3>Fotos del resultado final <span class="sub" style="font-family:var(--f-body);font-weight:500;font-size:13px">· hasta ${MAX_FOTOS}, salen en el PDF</span></h3>
-        <div class="gallery">${(r.fotos||[]).map((f,k)=>`<figure><img src="${fotoSrc(f)}" alt="Foto ${k+1} del resultado final"><button class="btn small" data-act="quitar-foto" data-k="${k}" aria-label="Quitar foto ${k+1}">✕</button></figure>`).join('')}
+        ${r.mini&&!(r.fotos||[]).length?'<div class="notice" style="margin-bottom:10px;font-weight:500">Las fotos de esta receta no se guardaron. Vuelve a añadirlas para que salgan en el PDF.</div>':''}<div class="gallery">${(r.fotos||[]).map((f,k)=>`<figure><img src="${fotoSrc(f)}" alt="Foto ${k+1} del resultado final"><button class="btn small" data-act="quitar-foto" data-k="${k}" aria-label="Quitar foto ${k+1}">✕</button></figure>`).join('')}
         ${(r.fotos||[]).length<MAX_FOTOS?`<div class="add-wrap"><label class="add cam"><input type="file" id="f-foto-cam" data-foto="1" accept="image/*" capture="environment" hidden><span class="ico" aria-hidden="true">📷</span><span>Hacer foto</span></label><label class="add"><input type="file" id="f-foto" data-foto="1" accept="image/*" multiple hidden><span class="ico" aria-hidden="true">🖼️</span><span>Elegir de la galería</span></label></div>`:''}</div>
       </div>
     </div>
@@ -858,7 +882,7 @@ async function pdfReceta(r){
     doc.text(T(`Página ${i} de ${n}`),W-M,H-8,{align:'right'}); }
   const blob=doc.output('blob');
   const fname='Ficha '+safeName(r.nombre)+(r.alumno?' - '+safeName(r.alumno):'')+'.pdf';
-  r.pdfOk=true;
+  r.pdfOk=true; save();
   if(dl){ await saveFile(fname, blob, 'application/pdf'); return; }
   pdfListo(blob,fname,r);
 }
@@ -948,7 +972,7 @@ document.addEventListener('click',e=>{
     case 'borrar-pedir': $('#del-slot').innerHTML=`<span class="confirm">¿Eliminar la receta? <button class="btn small danger" data-act="borrar">Sí, eliminar</button><button class="btn small ghost" data-act="borrar-no">No</button></span>`; break;
     case 'borrar-no': $('#del-slot').innerHTML='<button class="btn danger" data-act="borrar-pedir">Eliminar</button>'; break;
     case 'borrar': (r.fotos||[]).forEach(delFoto); S.recetas=S.recetas.filter(x=>x.id!==r.id); S.recetas.forEach(x=>x.lineas.forEach(l=>{ if(l.ref==='r:'+r.id) l.ref='?:'+r.nombre; })); save(); ui.ficha=null; setTab('recetario'); toast('Receta eliminada'); break;
-    case 'quitar-foto': { const k=+b.dataset.k; const [f]=r.fotos.splice(k,1); delFoto(f); save(); render(); recalcFicha(); break; }
+    case 'quitar-foto': { const k=+b.dataset.k; const [f]=r.fotos.splice(k,1); delFoto(f); if(!r.fotos.length) r.mini=''; else miniatura(r.fotos[0]).then(m=>{ r.mini=m; save(); }); save(); render(); recalcFicha(); break; }
     case 'add-ing': { const ing={id:uid(),nombre:'Nuevo ingrediente',familia:ui.ifam!=='Todas'?ui.ifam:'Otros',medida:'kg',formato:'',proveedor:'',albaran:'',fecha:'',precio:'',iva:'',unidades:'',contenido:'',contenidoUd:'kg',merma:''}; S.ingredientes.push(ing); save(); marcarIng(); ui.iq=''; render(); const el=$(`#in-n-${ing.id}`); el?.focus(); el?.select(); break; }
     case 'del-ing': { const tr=b.closest('tr'); S.ingredientes=S.ingredientes.filter(x=>x.id!==tr.dataset.ing); save(); marcarIng(); tr.remove(); counts(); toast('Ingrediente eliminado'); break; }
     case 'exportar': { const copy=JSON.parse(JSON.stringify(S)); copy.recetas.forEach(r=>{ r.fotos=(r.fotos||[]).map(fotoSrc).filter(Boolean); }); saveFile(`escandallos-postres-${today()}.json`, JSON.stringify({app:'ehsr-escandallos',v:2,...copy}),'application/json'); break; }
@@ -992,7 +1016,7 @@ document.addEventListener('change',e=>{
   if(fid&&t.dataset.f==='rendimiento'){ return; }
   if(t.closest('tr[data-ing]')&&t.dataset.k==='medida'){ const ing=ingById(t.closest('tr').dataset.ing); ing.contenidoUd= ing.medida==='L'?'L':'kg'; if(ing.medida==='ud') ing.contenido=''; save(); render(); return; }
   if(t.dataset.foto&&t.files.length){ const r=recById(fid); const files=[...t.files].slice(0,MAX_FOTOS-(r.fotos||[]).length);
-    (async()=>{ for(const f of files){ try{ const d=await readPhoto(f); r.fotos=r.fotos||[]; r.fotos.push(await putFoto(d)); }catch(e){ toast('No se pudo leer una de las imágenes'); } } save(); render(); recalcFicha(); if(t.files.length>files.length) toast(`Máximo ${MAX_FOTOS} fotos por receta`); })(); return; }
+    (async()=>{ for(const f of files){ try{ const d=await readPhoto(f); r.fotos=r.fotos||[]; r.fotos.push(await putFoto(d)); }catch(e){ toast('No se pudo leer una de las imágenes'); } } if(r.fotos.length) r.mini=await miniatura(r.fotos[0]); save(); render(); recalcFicha(); if(t.files.length>files.length) toast(`Máximo ${MAX_FOTOS} fotos por receta`); })(); return; }
   if((t.id==='imp-precios'||t.id==='imp-todo')&&t.files[0]){ const mode=t.id; const f=t.files[0]; f.text().then(txt=>importar(JSON.parse(txt),mode)).catch(()=>toast('El archivo no es una copia válida')).finally(()=>{t.value='';}); }
 });
 function readPhoto(file){ return new Promise((res,rej)=>{ const img=new Image(); const url=URL.createObjectURL(file); img.onload=()=>{ const max=1100; const sc=Math.min(1,max/Math.max(img.width,img.height)); const c=document.createElement('canvas'); c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc); c.getContext('2d').drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg',0.8)); }; img.onerror=rej; img.src=url; }); }
@@ -1014,6 +1038,7 @@ function importar(data,mode){
   save(); render(); toast(mode==='imp-precios'? `${act} ingredientes actualizados, ${nuevos} nuevos` : `${recs} recetas añadidas, ${nuevos} ingredientes nuevos`);
 }
 
+try{ cargarRecetas(); }catch(e){ console.error(e); }
 setTab(ui.tab);
 })();
 </script>

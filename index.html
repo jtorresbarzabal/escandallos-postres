@@ -260,6 +260,19 @@ td input,td select{padding:6px 8px}
 .ac-m{font-size:12.5px;color:var(--muted)}
 .ac-empty{padding:12px;font-size:14px;color:var(--muted)}
 @media (max-width:640px){.ac-it{padding:12px}.ac-n{font-size:16px}}
+.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:center;background:linear-gradient(135deg,var(--gold-soft),var(--surface));border:1px solid var(--line);border-radius:20px;padding:26px}
+.hero h2{font-size:clamp(22px,3vw,30px);font-weight:800;color:var(--gold-ink);margin-bottom:8px}
+.hero p{color:var(--muted);font-size:16px;margin:0;max-width:46ch}
+.hero-form{display:grid;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.btn-new{background:var(--gold);color:#fff;border:0;border-radius:12px;padding:15px 18px;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 6px 18px rgba(36,87,245,.28)}
+.btn-new:hover{filter:brightness(1.07)}
+.hero-note{font-size:12.5px;color:var(--muted);text-align:center}
+.steps3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.steps3 .st{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.steps3 .n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--gold);color:#fff;font-weight:800;display:grid;place-items:center}
+.steps3 b{display:block;margin-bottom:2px}
+.steps3 p{margin:0;font-size:13.5px;color:var(--muted)}
+@media (max-width:760px){.hero{grid-template-columns:1fr;padding:18px}.steps3{grid-template-columns:1fr}}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:30px;font-weight:600;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
 .confirm{display:inline-flex;gap:6px;align-items:center;background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:4px 8px;font-size:13px;font-weight:600}
 .notice{background:var(--warn-soft);color:var(--warn);border-radius:var(--r);padding:10px 14px;font-size:14px;font-weight:600}
@@ -278,7 +291,7 @@ footer{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:0 30px;c
 </header>
 <nav class="tabs" aria-label="Secciones">
   <div class="tabs-wrap"><div class="tabs-in" role="tablist">
-    <button class="tab" role="tab" data-tab="recetario" id="t-recetario">Recetario<span class="count" id="c-rec"></span></button>
+    <button class="tab" role="tab" data-tab="recetario" id="t-recetario">Inicio</button>
     <button class="tab" role="tab" data-tab="ficha" id="t-ficha" hidden>Ficha técnica</button>
     <button class="tab" role="tab" data-tab="ingredientes" id="t-ingredientes">Ingredientes y precios<span class="count" id="c-ing"></span></button>
     <button class="tab" role="tab" data-tab="ajustes" id="t-ajustes">Ajustes</button>
@@ -313,11 +326,11 @@ const norm = s=>String(s||'').trim().toLowerCase().normalize('NFD').replace(/[̀
 function seed(){
   const ings=PRECIOS_CENTRO.items.map((x,k)=>({id:'c'+k,...x}));
   const by=n=>ings.find(i=>i.nombre===n).id;
-  const crema={id:uid(),nombre:'Crema pastelera (ejemplo)',categoria:'Cremas y rellenos',alumno:'Ejemplo',fecha:today(),porcionTam:'',porciones:'',rendimiento:1350,tPrep:'15 min',tCoc:'8 min',tempServ:'Fría (4 °C)',pvp:'',iva:10,
+  const crema={id:uid(),nombre:'Crema pastelera (ejemplo)',categoria:'Cremas y rellenos',ejemplo:true,alumno:'Ejemplo',fecha:today(),porcionTam:'',porciones:'',rendimiento:1350,tPrep:'15 min',tCoc:'8 min',tempServ:'Fría (4 °C)',pvp:'',iva:10,
     lineas:[{ref:'i:'+by('Leche entera'),cant:1000,ud:'ml'},{ref:'i:'+by('Yema de huevo pasteurizada'),cant:160,ud:'g'},{ref:'i:'+by('Azúcar blanco'),cant:200,ud:'g'},{ref:'i:'+by('Fécula de maíz (maicena)'),cant:80,ud:'g'},{ref:'i:'+by('Aroma de vainilla Bourbon'),cant:5,ud:'ml'}],
     elaboracion:'1. Calentar la leche con el aroma de vainilla.\n2. Blanquear yemas con azúcar y añadir la maicena.\n3. Verter la leche caliente sobre la mezcla, volver al fuego y cocer sin dejar de remover hasta que espese y hierva 1 minuto.\n4. Enfriar rápidamente con film a piel.',
     presentacion:'Elaboración base para rellenos (no se sirve sola).',equipo:'Cazo, varillas, bol, abatidor o baño de hielo, film.',alergenos:['Lácteos','Huevo'],fotos:[]};
-  const tarta={id:uid(),nombre:'Tarta de queso al horno (ejemplo)',categoria:'Postres a base de lácteos',alumno:'Ejemplo',fecha:today(),porcionTam:'1 porción (≈110 g)',porciones:10,rendimiento:'',tPrep:'20 min',tCoc:'45 min a 170 °C',tempServ:'Fría (4–6 °C)',pvp:'',iva:10,
+  const tarta={id:uid(),nombre:'Tarta de queso al horno (ejemplo)',categoria:'Postres a base de lácteos',ejemplo:true,alumno:'Ejemplo',fecha:today(),porcionTam:'1 porción (≈110 g)',porciones:10,rendimiento:'',tPrep:'20 min',tCoc:'45 min a 170 °C',tempServ:'Fría (4–6 °C)',pvp:'',iva:10,
     lineas:[{ref:'i:'+by('Queso crema KEN'),cant:600,ud:'g'},{ref:'i:'+by('Nata 35 % M.G. Debic'),cant:200,ud:'ml'},{ref:'i:'+by('Azúcar blanco'),cant:180,ud:'g'},{ref:'i:'+by('Huevo L'),cant:4,ud:'ud'},{ref:'i:'+by('Harina floja Brisa'),cant:20,ud:'g'}],
     elaboracion:'1. Atemperar el queso.\n2. Mezclar queso y azúcar sin airear.\n3. Incorporar los huevos de uno en uno, después la nata y la harina tamizada.\n4. Hornear en molde encamisado a 170 °C durante 45 minutos.\n5. Enfriar y reservar en cámara mínimo 6 horas.',
     presentacion:'Porción en plato de postre, acompañada de coulis de frutos rojos.',equipo:'Molde de 22 cm, papel de horno, varillas, bol, horno.',alergenos:['Gluten','Huevo','Lácteos'],fotos:[]};
@@ -389,7 +402,7 @@ function pedirPin(onOk,titulo){
     else { bg.querySelector('#pin-err').textContent='Código incorrecto'; inp.value=''; inp.focus(); } });
 }
 function save(){ hayCambios=true; }
-window.addEventListener('beforeunload',e=>{ if(hayCambios){ e.preventDefault(); e.returnValue=''; } });
+window.addEventListener('beforeunload',e=>{ if(S.recetas.some(r=>!r.ejemplo&&!r.pdfOk)||ingDirty){ e.preventDefault(); e.returnValue=''; } });
 const fotoSrc = f=> f? String(f) : '';
 async function putFoto(dataUrl){ return dataUrl; }
 function delFoto(){}
@@ -462,7 +475,7 @@ function setTab(t){
 }
 $('.tabs-in').addEventListener('click',e=>{ const b=e.target.closest('.tab'); if(!b) return; if(b.dataset.tab==='ajustes'&&!desbloqueado){ setTab('ajustes'); pedirPin(()=>render()); return; } setTab(b.dataset.tab); });
 function counts(){
-  $('#c-rec').textContent=S.recetas.length;
+  
   const sin=S.ingredientes.filter(i=>num(i.precio)==null).length;
   $('#c-ing').textContent= sin? sin+' sin precio' : S.ingredientes.length;
 }
@@ -470,7 +483,7 @@ function render(){
   counts();
   const m=$('#main');
   const notice = '<div class="notice" style="font-weight:500"><b>Las recetas y fotos no se guardan en la app.</b> Cuando termines, pulsa «Descargar PDF» en cada receta. Al cerrar o recargar la página se borran.</div>';
-  if(ui.tab==='recetario') m.innerHTML=notice+vRecetario();
+  if(ui.tab==='recetario') m.innerHTML=vRecetario();
   else if(ui.tab==='ficha'&&ui.ficha&&recById(ui.ficha)) { m.innerHTML=notice+vFicha(recById(ui.ficha)); }
   else if(ui.tab==='ingredientes') m.innerHTML=notice+vIngredientes();
   else if(ui.tab==='ajustes') m.innerHTML= desbloqueado? vAjustes() : `<section class="lock panel"><h3>Ajustes · acceso de profesora</h3><div class="sub" style="margin-bottom:12px">Esta sección necesita código de acceso.</div><button class="btn primary" data-act="desbloquear">Introducir código</button></section>`;
@@ -481,34 +494,41 @@ function toast(msg){ let t=$('.toast'); if(!t){t=document.createElement('div');t
 
 /* ---------- Vista: Recetario ---------- */
 function vRecetario(){
-  const cats=S.settings.categorias;
-  const q=norm(ui.q);
-  let list=S.recetas.filter(r=>(ui.cat==='Todas'||r.categoria===ui.cat)&&(!q||norm(r.nombre+' '+r.alumno).includes(q)));
-  const groups=[...cats, ...new Set(S.recetas.map(r=>r.categoria).filter(c=>c&&!cats.includes(c)))];
-  let html=`<section class="view">
-  <div class="bar"><div class="grow"><h2 class="h-sec">Recetario</h2><div class="sub">Abre una receta para ver su ficha técnica y su escandallo, o crea una nueva.</div></div>
-  <button class="btn primary" data-act="nueva">+ Nueva receta</button></div>
-  <div class="bar"><input type="search" id="q-rec" class="grow" placeholder="Buscar por receta o alumno/a" value="${esc(ui.q)}" style="max-width:340px"></div>
-  <div class="cats" role="group" aria-label="Filtrar por categoría">${['Todas',...groups].map(c=>`<button class="chip" data-cat="${esc(c)}" aria-pressed="${c===ui.cat}">${esc(c)}</button>`).join('')}</div>`;
-  if(!list.length){
-    html+=`<div class="empty">${S.recetas.length?'Ninguna receta coincide con el filtro.':'Todavía no hay recetas.'}<br><br><button class="btn primary" data-act="nueva">+ Crear la primera receta</button></div>`;
-  }
-  for(const g of [...groups,'']){
-    const items=list.filter(r=>(r.categoria||'')===g || (g===''&&!r.categoria));
-    if(!items.length) continue;
-    html+=`<div class="group"><h2>${esc(g||'Sin categoría')}</h2><div class="cards">${items.map(card).join('')}</div></div>`;
-  }
-  return html+'</section>';
+  const st=S.settings;
+  const mias=S.recetas.filter(r=>!r.ejemplo);
+  const ej=S.recetas.filter(r=>r.ejemplo);
+  const pend=mias.filter(r=>!r.pdfOk).length;
+  return `<section class="view">
+  <div class="hero">
+    <div class="hero-txt"><h2>¿Qué postre vas a escandallar hoy?</h2>
+      <p>Crea la ficha técnica, calcula el coste con los precios reales de nuestros proveedores y descárgala en PDF.</p></div>
+    <div class="hero-form">
+      <label class="f"><span>Tu nombre</span><input type="text" id="s-alumno" data-s="alumno" value="${esc(st.alumno)}" placeholder="Nombre y apellidos" autocomplete="name"></label>
+      <label class="f"><span>Grupo</span><input type="text" id="s-curso" data-s="curso" value="${esc(st.curso)}" placeholder="p. ej. 1º CFGM Cocina"></label>
+      <button class="btn-new" data-act="nueva">+ Nueva receta</button>
+      <div class="hero-note">Tu nombre y grupo saldrán en el PDF.</div>
+    </div>
+  </div>
+  <div class="steps3">
+    <div class="st"><span class="n">1</span><div><b>Ingredientes</b><p>Escribe y elige de la lista. El coste se calcula solo.</p></div></div>
+    <div class="st"><span class="n">2</span><div><b>Precio y fotos</b><p>Pon el PVP y haz la foto del postre terminado.</p></div></div>
+    <div class="st"><span class="n">3</span><div><b>Descarga el PDF</b><p>Guárdalo o envíalo antes de cerrar: la app no guarda recetas.</p></div></div>
+  </div>
+  ${mias.length?`<div class="group"><h2>Tus recetas de hoy</h2>
+    ${pend?`<div class="notice" style="margin-bottom:12px">Tienes ${pend===1?'1 receta':pend+' recetas'} sin descargar en PDF. Si cierras la página, se perderán.</div>`:''}
+    <div class="cards">${mias.map(card).join('')}</div></div>`:''}
+  ${ej.length?`<div class="group"><h2>Recetas de ejemplo</h2><div class="sub" style="margin:-4px 0 10px">Ábrelas para ver cómo se rellena una ficha técnica completa.</div><div class="cards">${ej.map(card).join('')}</div></div>`:''}
+  </section>`;
 }
 function card(r){
   const s=resumen(r);
-  const est = !r.lineas.length ? '<span class="pill neutral">Sin ingredientes</span>' : s.falta.length ? `<span class="pill warn">Faltan ${s.falta.length} precio${s.falta.length>1?'s':''}</span>` : '<span class="pill ok">Escandallo completo</span>';
+  const est = !r.lineas.some(l=>l.ref) ? '<span class="pill neutral">Sin ingredientes</span>' : s.falta.length ? `<span class="pill warn">Faltan ${s.falta.length} precio${s.falta.length>1?'s':''}</span>` : '<span class="pill ok">Escandallo completo</span>';
   const fcp = s.fc!=null? `<span class="pill ${fcClass(s.fc,s.obj)}">${pct(s.fc)}</span>`:'<b>—</b>';
   const rend=0;
   return `<button class="card" data-open="${r.id}">
     ${(r.fotos||[]).length&&fotoSrc(r.fotos[0])?`<img class="thumb" src="${fotoSrc(r.fotos[0])}" alt="">`:''}
     <div><div class="t">${esc(r.nombre||'Receta sin nombre')}</div><div class="who">${esc(r.alumno||'Sin autor')}${r.fecha?' · '+esc(new Date(r.fecha).toLocaleDateString('es-ES')):''}</div></div>
-    <div>${est}${rend?' <span class="pill neutral">Elaboración base · '+fmt(rend,0)+' g</span>':''}</div>
+    <div>${est}${r.ejemplo?' <span class="pill neutral">Ejemplo</span>':(r.pdfOk?' <span class="pill ok">PDF descargado ✓</span>':' <span class="pill warn">PDF pendiente</span>')}${rend?' <span class="pill neutral">Elaboración base · '+fmt(rend,0)+' g</span>':''}</div>
     <div class="figs num"><div class="fig"><small>Coste ración</small><b>${s.falta.length?'—':eur(s.racion)}</b></div><div class="fig"><small>PVP</small><b>${eur(s.pvp)}</b></div><div class="fig"><small>% coste</small>${s.falta.length?'<b>—</b>':fcp}</div></div>
   </button>`;
 }
@@ -529,7 +549,7 @@ function refName(l){
 function vFicha(r){
   const cats=S.settings.categorias.includes(r.categoria)||!r.categoria?S.settings.categorias:[...S.settings.categorias,r.categoria];
   return `<section class="view" id="ficha" data-id="${r.id}">
-  <div class="bar"><button class="btn ghost" data-act="volver">← Recetario</button><div class="grow"></div>
+  <div class="bar"><button class="btn ghost" data-act="volver">← Inicio</button><div class="grow"></div>
     <button class="btn primary" data-act="pdf">Descargar PDF</button>
     <span id="del-slot"><button class="btn danger" data-act="borrar-pedir">Eliminar</button></span></div>
   <div class="ficha-head">
@@ -705,8 +725,6 @@ function vAjustes(){
   <div class="two">
     <div class="panel" style="display:grid;gap:12px"><h3 style="margin:0">Valores por defecto</h3>
       <div class="fields">
-        <label class="f"><span>Alumno/a</span><input type="text" id="s-alumno" data-s="alumno" value="${esc(st.alumno)}" placeholder="Se pone en las recetas nuevas"></label>
-        <label class="f"><span>Grupo / curso</span><input type="text" id="s-curso" data-s="curso" value="${esc(st.curso)}" placeholder="p. ej. 2º CFGM Cocina"></label>
         <label class="f"><span>IVA hostelería %</span><input type="number" id="s-iva" data-s="iva" value="${esc(st.iva)}" class="num"></label>
         <label class="f"><span>Objetivo % de coste</span><input type="number" id="s-obj" data-s="objetivo" value="${esc(st.objetivo)}" class="num"></label>
       </div>
@@ -840,12 +858,13 @@ async function pdfReceta(r){
     doc.text(T(`Página ${i} de ${n}`),W-M,H-8,{align:'right'}); }
   const blob=doc.output('blob');
   const fname='Ficha '+safeName(r.nombre)+(r.alumno?' - '+safeName(r.alumno):'')+'.pdf';
+  r.pdfOk=true;
   if(dl){ await saveFile(fname, blob, 'application/pdf'); return; }
   pdfListo(blob,fname,r);
 }
 /* ---------- Acciones ---------- */
 function nuevaReceta(){
-  const r={id:uid(),nombre:'',categoria:ui.cat!=='Todas'?ui.cat:'',alumno:S.settings.alumno||'',fecha:today(),porcionTam:'',porciones:'',rendimiento:'',tPrep:'',tCoc:'',tempServ:'',pvp:'',iva:S.settings.iva,lineas:[{ref:'',cant:'',ud:'g'}],elaboracion:'',presentacion:'',equipo:'',alergenos:[],fotos:[]};
+  const r={id:uid(),nombre:'',categoria:'',alumno:S.settings.alumno||'',fecha:today(),porcionTam:'',porciones:'',rendimiento:'',tPrep:'',tCoc:'',tempServ:'',pvp:'',iva:S.settings.iva,lineas:[{ref:'',cant:'',ud:'g'}],elaboracion:'',presentacion:'',equipo:'',alergenos:[],fotos:[]};
   S.recetas.push(r); save(); abrir(r.id); setTimeout(()=>$('#f-nombre')?.focus(),50);
 }
 function abrir(id){ ui.ficha=id; ui.escala=''; setTab('ficha'); recalcFicha(); }

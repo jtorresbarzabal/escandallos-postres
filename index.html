@@ -228,6 +228,9 @@ td input,td select{padding:6px 8px}
   .alg label{padding:8px 14px;font-size:15px}
   .modal{padding:20px}
 }
+.big-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px;font-size:16px;text-decoration:none;white-space:normal;color:inherit}
+.big-btn small{font-weight:500;font-size:12.5px;opacity:.85}
+.btn.primary.big-btn{color:var(--on-gold)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:30px;font-weight:600;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
 .confirm{display:inline-flex;gap:6px;align-items:center;background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:4px 8px;font-size:13px;font-weight:600}
 .notice{background:var(--warn-soft);color:var(--warn);border-radius:var(--r);padding:10px 14px;font-size:14px;font-weight:600}
@@ -687,6 +690,27 @@ async function saveFile(filename,data,mime){
   try{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([data],{type:mime})); a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500); toast('Archivo descargado'); }
   catch(e){ toast('No se pudo descargar el archivo en esta vista'); }
 }
+function pdfListo(blob,fname,r){
+  const file=new File([blob],fname,{type:'application/pdf'});
+  const url=URL.createObjectURL(blob);
+  const puedeCompartir=!!(navigator.canShare&&navigator.canShare({files:[file]}));
+  const bg=document.createElement('div'); bg.className='modal-bg';
+  bg.innerHTML=`<div class="modal" role="dialog" aria-label="PDF listo">
+    <h3>PDF listo ✓</h3>
+    <div class="sub">«${esc(fname)}»</div>
+    ${puedeCompartir?`<button class="btn primary big-btn" id="pdf-share">📤 Guardar o enviar<br><small>WhatsApp, correo, Drive, Classroom, Archivos…</small></button>`:''}
+    <a class="btn big-btn ${puedeCompartir?'':'primary'}" id="pdf-open" href="${url}" target="_blank" rel="noopener">👁️ Abrir el PDF</a>
+    <a class="btn big-btn" id="pdf-dl" href="${url}" download="${esc(fname)}">⬇️ Descargar al dispositivo</a>
+    <div class="sub" style="font-size:13px">Si lo descargas en el móvil, lo encontrarás en la app <b>Archivos</b> (o <b>Mis archivos</b>) → carpeta <b>Descargas</b>, con el nombre de la receta.</div>
+    <button class="btn ghost" id="pdf-close">Cerrar</button></div>`;
+  document.body.appendChild(bg);
+  const close=()=>{ bg.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000); };
+  bg.querySelector('#pdf-close').onclick=close;
+  bg.addEventListener('click',e=>{ if(e.target===bg) close(); });
+  const sh=bg.querySelector('#pdf-share');
+  if(sh) sh.onclick=async()=>{ try{ await navigator.share({files:[file],title:fname}); close(); toast('PDF compartido'); }catch(e){ if(e&&e.name!=='AbortError') toast('No se pudo compartir; prueba «Descargar»'); } };
+  bg.querySelector('#pdf-dl').addEventListener('click',()=>toast('Descargado: búscalo en Archivos → Descargas'));
+}
 const safeName = s=>String(s||'receta').replace(/[\\/:*?"<>|]+/g,'').trim().slice(0,80)||'receta';
 const WIN_EXTRA='€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ';
 function pdfSafe(t){ return String(t??'').replace(/≈/g,'~').replace(/[−‐]/g,'-').replace(/→/g,'->').replace(/[^\n\r\t\x20-\xFF]/g,ch=>WIN_EXTRA.includes(ch)?ch:''); }
@@ -772,7 +796,9 @@ async function pdfReceta(r){
     doc.text(T('Escuela de Hostelería San Roque · Postres en Restauración · Generado el '+new Date().toLocaleDateString('es-ES')),M,H-8);
     doc.text(T(`Página ${i} de ${n}`),W-M,H-8,{align:'right'}); }
   const blob=doc.output('blob');
-  await saveFile('Ficha técnica - '+safeName(r.nombre)+'.pdf', blob, 'application/pdf');
+  const fname='Ficha '+safeName(r.nombre)+(r.alumno?' - '+safeName(r.alumno):'')+'.pdf';
+  if(dl){ await saveFile(fname, blob, 'application/pdf'); return; }
+  pdfListo(blob,fname,r);
 }
 /* ---------- Acciones ---------- */
 function nuevaReceta(){

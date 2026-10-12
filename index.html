@@ -252,6 +252,14 @@ td input,td select{padding:6px 8px}
 .save-bar .btn.ghost{color:#fff;border-color:rgba(255,255,255,.5);background:transparent}
 .save-bar .btn-save{margin:0}
 @media (max-width:640px){.save-bar{padding:12px}.save-bar .grow{display:none}.save-bar .sb-txt{flex:1 1 100%}.save-bar .btn,.save-bar .btn-save{flex:1;justify-content:center}}
+.ac{position:absolute;z-index:40;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 34px rgba(15,27,61,.18);max-height:min(340px,50vh);overflow-y:auto;padding:6px;-webkit-overflow-scrolling:touch}
+.ac-it{display:flex;flex-direction:column;gap:1px;padding:9px 11px;border-radius:8px;cursor:pointer}
+.ac-it:hover,.ac-it.sel{background:var(--gold-soft)}
+.ac-n{font-weight:600;color:var(--ink)}
+.ac-n mark{background:none;color:var(--gold-ink);font-weight:800;text-decoration:underline;text-underline-offset:2px}
+.ac-m{font-size:12.5px;color:var(--muted)}
+.ac-empty{padding:12px;font-size:14px;color:var(--muted)}
+@media (max-width:640px){.ac-it{padding:12px}.ac-n{font-size:16px}}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:30px;font-weight:600;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
 .confirm{display:inline-flex;gap:6px;align-items:center;background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:4px 8px;font-size:13px;font-weight:600}
 .notice{background:var(--warn-soft);color:var(--warn);border-radius:var(--r);padding:10px 14px;font-size:14px;font-weight:600}
@@ -571,7 +579,7 @@ function lineRow(r,l,i){
   const ud=units.includes(l.ud)?l.ud:units[0];
   const unknown = !info.src && refName(l);
   return `<tr data-i="${i}">
-    <td class="name"><input type="text" list="dl-ings" id="ln-n-${i}" data-ln="nombre" value="${esc(refName(l))}" placeholder="Buscar ingrediente" aria-label="Ingrediente">
+    <td class="name"><input type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" id="ln-n-${i}" data-ln="nombre" value="${esc(refName(l))}" placeholder="Buscar ingrediente" aria-label="Ingrediente">
       ${info.src&&info.src.proveedor?`<div class="unit">Proveedor: ${esc(info.src.proveedor)}</div>`:''}
       ${unknown?`<div class="miss">No está en la lista. <button class="linkbtn" data-act="crear-ing" data-i="${i}">Crear «${esc(refName(l))}»</button></div>`:''}</td>
     <td class="r" data-label="Cantidad"><input type="number" min="0" step="any" id="ln-c-${i}" data-ln="cant" value="${esc(l.cant)}" class="num" style="width:96px;text-align:right" aria-label="Cantidad"></td>
@@ -842,6 +850,53 @@ function nuevaReceta(){
   S.recetas.push(r); save(); abrir(r.id); setTimeout(()=>$('#f-nombre')?.focus(),50);
 }
 function abrir(id){ ui.ficha=id; ui.escala=''; setTab('ficha'); recalcFicha(); }
+/* ---------- Buscador desplegable de ingredientes ---------- */
+let acBox=null, acInput=null, acItems=[], acSel=-1, acPicking=false;
+function acOpciones(q,currentId){
+  const nq=norm(q);
+  const ings=S.ingredientes.map(i=>({tipo:'i',id:i.id,nombre:i.nombre,prov:i.proveedor||'',c:costeIng(i),medida:i.medida}));
+  const elabs=S.recetas.filter(r=>r.id!==currentId&&pesoReceta(r)>0).map(r=>({tipo:'r',id:r.id,nombre:'Elaboración: '+r.nombre,prov:'Elaboración propia'}));
+  let list=[...ings,...elabs];
+  if(nq){ list=list.filter(o=>norm(o.nombre).includes(nq)).sort((a,b)=>{ const sa=norm(a.nombre).startsWith(nq)?0:1, sb=norm(b.nombre).startsWith(nq)?0:1; return sa-sb||a.nombre.localeCompare(b.nombre,'es'); }); }
+  else list.sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+  return list;
+}
+function acCerrar(){ if(acBox){ acBox.remove(); acBox=null; } if(acInput) acInput.setAttribute('aria-expanded','false'); acInput=null; acItems=[]; acSel=-1; }
+function acAbrir(inp){
+  const fid=$('#ficha')?.dataset.id; if(!fid) return;
+  acInput=inp; acItems=acOpciones(inp.value,fid); acSel=acItems.length?0:-1;
+  if(!acBox){ acBox=document.createElement('div'); acBox.className='ac'; acBox.setAttribute('role','listbox'); document.body.appendChild(acBox);
+    acBox.addEventListener('mousedown',e=>e.preventDefault());
+    acBox.addEventListener('click',e=>{ const it=e.target.closest('[data-k]'); if(it) acElegir(+it.dataset.k); }); }
+  const q=norm(inp.value);
+  const hl=n=>{ if(!q) return esc(n); const k=norm(n).indexOf(q); if(k<0) return esc(n); return esc(n.slice(0,k))+'<mark>'+esc(n.slice(k,k+q.length))+'</mark>'+esc(n.slice(k+q.length)); };
+  acBox.innerHTML = acItems.length? acItems.map((o,k)=>`<div class="ac-it ${k===acSel?'sel':''}" role="option" data-k="${k}"><span class="ac-n">${hl(o.nombre)}</span><span class="ac-m">${esc(o.prov)}${o.c?` · ${eur(o.c.neto)}/${o.c.base}`:''}</span></div>`).join('')
+    : `<div class="ac-empty">No hay ningún ingrediente con «${esc(inp.value)}». Al salir del campo podrás crearlo.</div>`;
+  const rc=inp.getBoundingClientRect();
+  acBox.style.left=(rc.left+window.scrollX)+'px'; acBox.style.top=(rc.bottom+window.scrollY+4)+'px'; acBox.style.width=Math.max(rc.width,Math.min(360,window.innerWidth-32))+'px';
+  const over=rc.left+Math.max(rc.width,360)-(window.innerWidth-16); if(over>0) acBox.style.left=Math.max(16,rc.left+window.scrollX-over)+'px';
+  inp.setAttribute('aria-expanded','true');
+}
+function acElegir(k){
+  const o=acItems[k]; if(!o||!acInput) return;
+  const fid=$('#ficha')?.dataset.id; const r=recById(fid); const i=+acInput.closest('tr').dataset.i; const l=r.lineas[i];
+  l.ref=(o.tipo==='i'?'i:':'r:')+o.id;
+  const info=lineInfo(l); if(info.src){ const u=unitsFor(info.medida); if(!u.includes(l.ud)) l.ud=u[0]; }
+  acPicking=true; acCerrar(); save(); redrawLines(r); acPicking=false;
+  const c=$(`#ln-c-${i}`); if(c){ c.focus(); c.select&&c.select(); }
+}
+document.addEventListener('focusin',e=>{ if(e.target.dataset&&e.target.dataset.ln==='nombre') acAbrir(e.target); });
+document.addEventListener('focusout',e=>{ if(e.target===acInput) setTimeout(()=>{ if(document.activeElement!==acInput) acCerrar(); },150); });
+document.addEventListener('keydown',e=>{
+  if(!acBox||e.target!==acInput) return;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); if(!acItems.length) return; acSel=(acSel+(e.key==='ArrowDown'?1:-1)+acItems.length)%acItems.length;
+    $$('.ac-it',acBox).forEach((el,k)=>el.classList.toggle('sel',k===acSel)); $$('.ac-it',acBox)[acSel]?.scrollIntoView({block:'nearest'}); }
+  else if(e.key==='Enter'){ if(acSel>=0){ e.preventDefault(); acElegir(acSel); } }
+  else if(e.key==='Escape'){ acCerrar(); }
+});
+window.addEventListener('resize',()=>{ if(acInput) acAbrir(acInput); });
+document.addEventListener('scroll',()=>{ if(acInput) acAbrir(acInput); },{passive:true,capture:true});
+
 function resolveRef(text,currentId){
   const t=norm(text); if(!t) return '';
   if(t.startsWith('elaboracion:')){ const n=t.slice(12).trim(); const r=S.recetas.find(x=>x.id!==currentId&&norm(x.nombre)===n&&pesoReceta(x)>0); if(r) return 'r:'+r.id; }
@@ -888,6 +943,7 @@ document.addEventListener('click',e=>{
 
 document.addEventListener('input',e=>{
   const t=e.target;
+  if(t.dataset&&t.dataset.ln==='nombre'){ acAbrir(t); return; }
   if(t.id==='q-rec'){ ui.q=t.value; const pos=t.selectionStart; render(); const n=$('#q-rec'); n.focus(); n.setSelectionRange(pos,pos); return; }
   if(t.id==='q-ing'){ ui.iq=t.value; const pos=t.selectionStart; render(); const n=$('#q-ing'); n.focus(); n.setSelectionRange(pos,pos); return; }
   if(t.id==='f-escala'){ ui.escala=t.value; recalcFicha(); return; }
@@ -911,7 +967,7 @@ document.addEventListener('change',e=>{
   const t=e.target; const fid=$('#ficha')?.dataset.id;
   if(t.id==='f-fam'){ ui.ifam=t.value; render(); return; }
   if(t.id==='f-prov'){ ui.iprov=t.value; render(); return; }
-  if(fid&&t.dataset.ln==='nombre'){ const r=recById(fid); const i=+t.closest('tr').dataset.i; const l=r.lineas[i];
+  if(fid&&t.dataset.ln==='nombre'){ if(acPicking) return; const r=recById(fid); const i=+t.closest('tr').dataset.i; const l=r.lineas[i];
     l.ref=resolveRef(t.value,fid); const info=lineInfo(l); if(info.src){ const u=unitsFor(info.medida); if(!u.includes(l.ud)) l.ud=u[0]; }
     save(); redrawLines(r); return; }
   if(fid&&t.dataset.alg){ const r=recById(fid); const a=t.dataset.alg; r.alergenos = t.checked? [...new Set([...r.alergenos,a])] : r.alergenos.filter(x=>x!==a); save(); return; }

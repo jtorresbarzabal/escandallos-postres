@@ -176,6 +176,58 @@ td input,td select{padding:6px 8px}
 .gallery .add{border:2px dashed var(--line);border-radius:8px;aspect-ratio:4/3;display:grid;place-items:center;text-align:center;color:var(--muted);cursor:pointer;font-weight:600;padding:10px}
 .gallery .add:hover{border-color:var(--gold);color:var(--ink)}
 .iva-chip{font-size:11px;font-weight:700;color:var(--muted)}
+/* Fotos */
+.add-wrap{display:grid;grid-template-columns:1fr 1fr;gap:10px;grid-column:span 2}
+.add .ico{display:block;font-size:26px;line-height:1;margin-bottom:6px}
+.add.cam{border-color:var(--gold);color:var(--gold-ink);background:var(--gold-soft)}
+@media (max-width:420px){.add-wrap{grid-column:1/-1}}
+
+/* ---------- Móvil ---------- */
+@media (max-width:640px){
+  body{font-size:16px}
+  .brand-in{gap:12px;padding-block:12px}
+  .brand img{width:48px;height:48px}
+  .brand-txt h1{font-size:22px}
+  .brand .meta{font-size:12.5px;gap:2px 12px}
+  .tab{padding:12px 14px;font-size:15px}
+  main{padding-block:16px 80px}
+  .view{gap:16px}
+  .panel{padding:16px}
+  .h-sec{font-size:21px}
+  .btn{padding:11px 16px;font-size:15px}
+  .btn.small{padding:8px 12px}
+  input[type=text],input[type=number],input[type=date],input[type=search],select,textarea{font-size:16px;padding:11px 12px;min-height:46px}
+  .fields{grid-template-columns:1fr;gap:14px}
+  .inline2{grid-template-columns:1fr 1fr}
+  .texts{grid-template-columns:1fr}
+  .bar .grow{min-width:0;flex-basis:100%}
+  .bar input[type=search],.bar select{max-width:none!important;flex:1 1 100%}
+  .cards{grid-template-columns:1fr}
+  .notice{font-size:14px}
+  .gallery{grid-template-columns:1fr 1fr}
+  .add-wrap{grid-column:1/-1}
+  .add{aspect-ratio:auto;padding:18px 10px}
+  /* Tablas convertidas en tarjetas */
+  .tbl-wrap{border:0;background:none;overflow:visible}
+  .tbl-wrap table,.tbl-wrap tbody,.tbl-wrap tr,.tbl-wrap td{display:block;width:100%}
+  .tbl-wrap thead{display:none}
+  .tbl-wrap tr{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px;position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+  .tbl-wrap td{border:0;padding:0;white-space:normal!important;min-width:0!important;text-align:left!important}
+  .tbl-wrap td[hidden]{display:none}
+  .tbl-wrap td[data-label]::before{content:attr(data-label);display:block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .tbl-wrap td.name{grid-column:1/-1;padding-right:44px}
+  .tbl-wrap td.del{position:absolute;top:8px;right:6px;width:auto}
+  .tbl-wrap td input,.tbl-wrap td select{width:100%!important;min-width:0!important;text-align:left!important}
+  .tbl-wrap td span[style*="inline-flex"]{display:flex!important;width:100%}
+  .ing-tbl td:first-child,.ing-tbl th:first-child{position:static;box-shadow:none;background:none}
+  .lines td:first-child{min-width:0}
+  .share{min-width:0}
+  .mt-cat{display:none}
+  .results{gap:12px}
+  .big .k b{font-size:21px}
+  .alg label{padding:8px 14px;font-size:15px}
+  .modal{padding:20px}
+}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:30px;font-weight:600;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
 .confirm{display:inline-flex;gap:6px;align-items:center;background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:4px 8px;font-size:13px;font-weight:600}
 .notice{background:var(--warn-soft);color:var(--warn);border-radius:var(--r);padding:10px 14px;font-size:14px;font-weight:600}
@@ -199,7 +251,6 @@ footer{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:0 30px;c
     <button class="tab" role="tab" data-tab="ingredientes" id="t-ingredientes">Ingredientes y precios<span class="count" id="c-ing"></span></button>
     <button class="tab" role="tab" data-tab="ajustes" id="t-ajustes">Ajustes</button>
   </div>
-  <button class="btn-save" id="btn-guardar" data-act="guardar" title="Guarda los cambios en precios y nombres de ingredientes"><span class="dot" aria-hidden="true"></span>GUARDAR</button>
   </div>
 </nav>
 <main id="main"></main>
@@ -214,7 +265,7 @@ const LOGO = document.querySelector('.brand img').src;
 const KEY = 'ehsr-escandallos-postres-v1';
 const ALERGENOS = ['Gluten','Crustáceos','Huevo','Pescado','Cacahuetes','Soja','Lácteos','Frutos de cáscara','Apio','Mostaza','Sésamo','Sulfitos','Altramuces','Moluscos'];
 const FAMILIAS = ['Harinas y féculas','Azúcares','Lácteos y huevos','Grasas y aceites','Chocolates y cacao','Frutos secos','Frutas','Frutas confitadas y secas','Purés y frutas congeladas','Rellenos y preparados','Gelificantes y aditivos','Aromas y colorantes','Masas y preelaborados','Licores','Otros'];
-const CATS_DEF = ['Postres de cuchara','Tartas y pasteles','Masas y bases','Cremas y rellenos','Helados y sorbetes','Postres de frutas','Chocolate y petits fours','Salsas y coulis'];
+const CATS_DEF = ['Postres a base de frutas','Postres a base de lácteos','Semifríos','Helados y sorbetes','Postres fritos o de sartén','Mignardises','Bizcochos','Cremas y rellenos','Salsas','Decoraciones'];
 const $ = (s,el=document)=>el.querySelector(s);
 const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
 const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -234,7 +285,7 @@ function seed(){
     lineas:[{ref:'i:'+by('Leche entera'),cant:1000,ud:'ml'},{ref:'i:'+by('Yema de huevo pasteurizada'),cant:160,ud:'g'},{ref:'i:'+by('Azúcar blanco'),cant:200,ud:'g'},{ref:'i:'+by('Fécula de maíz (maicena)'),cant:80,ud:'g'},{ref:'i:'+by('Aroma de vainilla Bourbon'),cant:5,ud:'ml'}],
     elaboracion:'1. Calentar la leche con el aroma de vainilla.\n2. Blanquear yemas con azúcar y añadir la maicena.\n3. Verter la leche caliente sobre la mezcla, volver al fuego y cocer sin dejar de remover hasta que espese y hierva 1 minuto.\n4. Enfriar rápidamente con film a piel.',
     presentacion:'Elaboración base para rellenos (no se sirve sola).',equipo:'Cazo, varillas, bol, abatidor o baño de hielo, film.',alergenos:['Lácteos','Huevo'],fotos:[]};
-  const tarta={id:uid(),nombre:'Tarta de queso al horno (ejemplo)',categoria:'Tartas y pasteles',alumno:'Ejemplo',fecha:today(),porcionTam:'1 porción (≈110 g)',porciones:10,rendimiento:'',tPrep:'20 min',tCoc:'45 min a 170 °C',tempServ:'Fría (4–6 °C)',pvp:'',iva:10,
+  const tarta={id:uid(),nombre:'Tarta de queso al horno (ejemplo)',categoria:'Postres a base de lácteos',alumno:'Ejemplo',fecha:today(),porcionTam:'1 porción (≈110 g)',porciones:10,rendimiento:'',tPrep:'20 min',tCoc:'45 min a 170 °C',tempServ:'Fría (4–6 °C)',pvp:'',iva:10,
     lineas:[{ref:'i:'+by('Queso crema KEN'),cant:600,ud:'g'},{ref:'i:'+by('Nata 35 % M.G. Debic'),cant:200,ud:'ml'},{ref:'i:'+by('Azúcar blanco'),cant:180,ud:'g'},{ref:'i:'+by('Huevo L'),cant:4,ud:'ud'},{ref:'i:'+by('Harina floja Brisa'),cant:20,ud:'g'}],
     elaboracion:'1. Atemperar el queso.\n2. Mezclar queso y azúcar sin airear.\n3. Incorporar los huevos de uno en uno, después la nata y la harina tamizada.\n4. Hornear en molde encamisado a 170 °C durante 45 minutos.\n5. Enfriar y reservar en cámara mínimo 6 horas.',
     presentacion:'Porción en plato de postre, acompañada de coulis de frutos rojos.',equipo:'Molde de 22 cm, papel de horno, varillas, bol, horno.',alergenos:['Gluten','Huevo','Lácteos'],fotos:[]};
@@ -256,7 +307,7 @@ let hayCambios=false;
 const KEY_PRECIOS='ehsr-escandallos-precios-v1';
 const PIN='1978';
 let desbloqueado=false, ingDirty=false, dbh=null;
-function marcarIng(){ ingDirty=true; const b=document.getElementById('btn-guardar'); if(b) b.classList.add('dirty'); }
+function marcarIng(){ ingDirty=true; const b=document.getElementById('btn-guardar'); if(b) b.classList.add('dirty'); const n=document.getElementById('ing-aviso'); if(n) n.hidden=false; }
 function aplicarGuardados(list){
   if(!Array.isArray(list)||!list.length) return false;
   const usados=new Set(S.recetas.flatMap(r=>r.lineas.map(l=>l.ref)));
@@ -277,7 +328,7 @@ async function guardarPrecios(){
   let local=false, compartido=false;
   try{ localStorage.setItem(KEY_PRECIOS,JSON.stringify(data)); local=true; }catch(e){}
   if(dbh){ try{ await dbh.doc('config/precios').set(data); compartido=true; }catch(e){} }
-  if(compartido||local){ ingDirty=false; document.getElementById('btn-guardar').classList.remove('dirty'); }
+  if(compartido||local){ ingDirty=false; if(ui.tab==='ajustes') render(); }
   toast(compartido? 'Guardado: precios y nombres actualizados para todos' : local? 'Guardado en este dispositivo' : 'No se ha podido guardar en este navegador');
 }
 function pedirPin(onOk,titulo){
@@ -475,7 +526,7 @@ function vFicha(r){
       </div>
       <div class="panel"><h3>Fotos del resultado final <span class="sub" style="font-family:var(--f-body);font-weight:500;font-size:13px">· hasta ${MAX_FOTOS}, salen en el PDF</span></h3>
         <div class="gallery">${(r.fotos||[]).map((f,k)=>`<figure><img src="${fotoSrc(f)}" alt="Foto ${k+1} del resultado final"><button class="btn small" data-act="quitar-foto" data-k="${k}" aria-label="Quitar foto ${k+1}">✕</button></figure>`).join('')}
-        ${(r.fotos||[]).length<MAX_FOTOS?`<label class="add"><input type="file" id="f-foto" accept="image/*" multiple hidden><span>+ Añadir fotos<br><small style="font-weight:500">desde el móvil o el ordenador</small></span></label>`:''}</div>
+        ${(r.fotos||[]).length<MAX_FOTOS?`<div class="add-wrap"><label class="add cam"><input type="file" id="f-foto-cam" data-foto="1" accept="image/*" capture="environment" hidden><span class="ico" aria-hidden="true">📷</span><span>Hacer foto</span></label><label class="add"><input type="file" id="f-foto" data-foto="1" accept="image/*" multiple hidden><span class="ico" aria-hidden="true">🖼️</span><span>Elegir de la galería</span></label></div>`:''}</div>
       </div>
     </div>
     <aside class="results" id="results">${resultsPanel(r)}</aside>
@@ -486,16 +537,16 @@ function lineRow(r,l,i){
   const ud=units.includes(l.ud)?l.ud:units[0];
   const unknown = !info.src && refName(l);
   return `<tr data-i="${i}">
-    <td><input type="text" list="dl-ings" id="ln-n-${i}" data-ln="nombre" value="${esc(refName(l))}" placeholder="Buscar ingrediente" aria-label="Ingrediente">
+    <td class="name"><input type="text" list="dl-ings" id="ln-n-${i}" data-ln="nombre" value="${esc(refName(l))}" placeholder="Buscar ingrediente" aria-label="Ingrediente">
       ${info.src&&info.src.proveedor?`<div class="unit">Proveedor: ${esc(info.src.proveedor)}</div>`:''}
       ${unknown?`<div class="miss">No está en la lista. <button class="linkbtn" data-act="crear-ing" data-i="${i}">Crear «${esc(refName(l))}»</button></div>`:''}</td>
-    <td class="r"><input type="number" min="0" step="any" id="ln-c-${i}" data-ln="cant" value="${esc(l.cant)}" class="num" style="width:96px;text-align:right" aria-label="Cantidad"></td>
-    <td><select id="ln-u-${i}" data-ln="ud" aria-label="Unidad">${units.map(u=>`<option ${u===ud?'selected':''}>${u}</option>`).join('')}</select></td>
-    <td class="r num" data-o="esc" ${num(ui.escala)?'':'hidden'}></td>
-    <td class="r num" data-o="unit"></td>
-    <td class="r num" data-o="coste"></td>
-    <td data-o="share"></td>
-    <td><button class="btn ghost small" data-act="del-linea" data-i="${i}" aria-label="Quitar ingrediente">✕</button></td>
+    <td class="r" data-label="Cantidad"><input type="number" min="0" step="any" id="ln-c-${i}" data-ln="cant" value="${esc(l.cant)}" class="num" style="width:96px;text-align:right" aria-label="Cantidad"></td>
+    <td data-label="Unidad"><select id="ln-u-${i}" data-ln="ud" aria-label="Unidad">${units.map(u=>`<option ${u===ud?'selected':''}>${u}</option>`).join('')}</select></td>
+    <td class="r num" data-label="Escalado" data-o="esc" ${num(ui.escala)?'':'hidden'}></td>
+    <td class="r num" data-label="Coste unitario" data-o="unit"></td>
+    <td class="r num" data-label="Coste" data-o="coste"></td>
+    <td data-label="% del total" data-o="share"></td>
+    <td class="del"><button class="btn ghost small" data-act="del-linea" data-i="${i}" aria-label="Quitar ingrediente">✕</button></td>
   </tr>`;
 }
 function resultsPanel(r){
@@ -562,6 +613,7 @@ function vIngredientes(){
   <div class="bar"><div class="grow"><h2 class="h-sec">Ingredientes y precios</h2><div class="sub">Lista común para todas las recetas. Si cambias un precio aquí, se actualizan todos los escandallos.</div></div>
     <button class="btn primary" data-act="add-ing">+ Añadir ingrediente</button></div>
   <div class="tip"><b>Cómo se rellena:</b> copia del albarán el <b>precio sin IVA</b> y el <b>tipo de IVA</b>; la app calcula el precio con IVA y el coste por kg, litro o unidad que usan los escandallos (todos los costes de las recetas llevan el IVA incluido). Ejemplo real: harina Brisa a 1,15 €/kg + 4 % de IVA = 1,20 €/kg; azúcar en saco de 25 kg a 20,69 € + 10 % = 22,76 € → 0,91 €/kg. ${PRECIOS_CENTRO.items.length?`Precios cargados: <b>albaranes del curso ${esc(PRECIOS_CENTRO.curso)}</b>.`:''}</div>
+  <div class="notice" id="ing-aviso" ${ingDirty?'':'hidden'}>Has cambiado precios o nombres. Para que se conserven, ve a <button class="linkbtn" data-act="ir-ajustes">Ajustes</button> y pulsa GUARDAR (necesita código).</div>
   <div class="bar"><input type="search" id="q-ing" placeholder="Buscar ingrediente" value="${esc(ui.iq)}" style="max-width:280px">
     <select id="f-fam" style="max-width:240px" aria-label="Familia"><option>Todas</option>${FAMILIAS.map(f=>`<option ${f===ui.ifam?'selected':''}>${esc(f)}</option>`).join('')}</select>
     <select id="f-prov" style="max-width:240px" aria-label="Proveedor"><option value="">Todos los proveedores</option>${[...new Set(S.ingredientes.map(i=>i.proveedor).filter(Boolean))].sort().map(p=>`<option ${p===ui.iprov?'selected':''}>${esc(p)}</option>`).join('')}</select>
@@ -578,22 +630,22 @@ function ingRow(i){
   const c=costeIng(i); const u=usos(i.id);
   const cUds = i.medida==='L'?['ml','L']:['g','kg'];
   return `<tr data-ing="${i.id}">
-    <td><input type="text" id="in-n-${i.id}" data-k="nombre" value="${esc(i.nombre)}" aria-label="Nombre"></td>
-    <td><select id="in-m-${i.id}" data-k="medida" aria-label="Medida en receta"><option value="kg" ${i.medida==='kg'?'selected':''}>Peso</option><option value="L" ${i.medida==='L'?'selected':''}>Volumen</option><option value="ud" ${i.medida==='ud'?'selected':''}>Unidades</option></select></td>
-    <td><select id="in-f-${i.id}" data-k="familia" aria-label="Familia">${FAMILIAS.map(f=>`<option ${f===i.familia?'selected':''}>${esc(f)}</option>`).join('')}</select></td>
-    <td><input type="text" id="in-pv-${i.id}" data-k="proveedor" value="${esc(i.proveedor)}" list="dl-prov" style="min-width:140px" aria-label="Proveedor"></td>
-    <td><input type="text" id="in-al-${i.id}" data-k="albaran" value="${esc(i.albaran)}" style="min-width:100px;width:110px" aria-label="Número de albarán"></td>
-    <td><input type="date" id="in-d-${i.id}" data-k="fecha" value="${esc(i.fecha)}" aria-label="Fecha del albarán"></td>
-    <td class="r"><input type="number" min="0" step="0.01" id="in-p-${i.id}" data-k="precio" value="${esc(i.precio)}" class="num" style="text-align:right" placeholder="Pendiente" aria-label="Precio sin IVA"></td>
-    <td><select id="in-iva-${i.id}" data-k="iva" aria-label="Tipo de IVA">${['','0','4','5','10','21'].map(v=>`<option value="${v}" ${String(i.iva??'')===v?'selected':''}>${v===''?'—':v+' %'}</option>`).join('')}</select></td>
-    <td class="r num" data-o="coniva">${conIvaCell(i,c)}</td>
-    <td class="r"><input type="number" min="0" step="1" id="in-u-${i.id}" data-k="unidades" value="${esc(i.unidades)}" class="num" style="text-align:right" placeholder="1" aria-label="Número de unidades"></td>
-    <td>${i.medida==='ud'?'<span class="unit">1 ud</span>':`<span style="display:inline-flex;gap:4px"><input type="number" min="0" step="any" id="in-c-${i.id}" data-k="contenido" value="${esc(i.contenido)}" class="num" style="text-align:right" placeholder="—" aria-label="Contenido"><select id="in-cu-${i.id}" data-k="contenidoUd" aria-label="Unidad del contenido">${cUds.map(x=>`<option ${x===i.contenidoUd?'selected':''}>${x}</option>`).join('')}</select></span>`}</td>
-    <td><input type="text" id="in-fo-${i.id}" data-k="formato" value="${esc(i.formato)}" placeholder="Saco, bote…" style="min-width:110px" aria-label="Formato de compra"></td>
-    <td class="r"><input type="number" min="0" max="99" step="0.5" id="in-me-${i.id}" data-k="merma" value="${esc(i.merma)}" class="num" style="text-align:right;width:76px" placeholder="0" aria-label="Merma %"></td>
-    <td class="r num cost-cell" data-o="neto">${c?'<b>'+eur(c.neto)+'</b> <span class="unit">/'+c.base+'</span>':'<span class="miss">Sin precio</span>'}</td>
-    <td class="r num">${u}</td>
-    <td data-o="del">${u?'':`<button class="btn ghost small" data-act="del-ing" aria-label="Eliminar ingrediente">✕</button>`}</td>
+    <td class="name" data-label="Ingrediente"><input type="text" id="in-n-${i.id}" data-k="nombre" value="${esc(i.nombre)}" aria-label="Nombre"></td>
+    <td data-label="Se usa en"><select id="in-m-${i.id}" data-k="medida" aria-label="Medida en receta"><option value="kg" ${i.medida==='kg'?'selected':''}>Peso</option><option value="L" ${i.medida==='L'?'selected':''}>Volumen</option><option value="ud" ${i.medida==='ud'?'selected':''}>Unidades</option></select></td>
+    <td data-label="Familia"><select id="in-f-${i.id}" data-k="familia" aria-label="Familia">${FAMILIAS.map(f=>`<option ${f===i.familia?'selected':''}>${esc(f)}</option>`).join('')}</select></td>
+    <td data-label="Proveedor"><input type="text" id="in-pv-${i.id}" data-k="proveedor" value="${esc(i.proveedor)}" list="dl-prov" style="min-width:140px" aria-label="Proveedor"></td>
+    <td data-label="Nº albarán"><input type="text" id="in-al-${i.id}" data-k="albaran" value="${esc(i.albaran)}" style="min-width:100px;width:110px" aria-label="Número de albarán"></td>
+    <td data-label="Fecha albarán"><input type="date" id="in-d-${i.id}" data-k="fecha" value="${esc(i.fecha)}" aria-label="Fecha del albarán"></td>
+    <td data-label="Precio sin IVA €" class="r"><input type="number" min="0" step="0.01" id="in-p-${i.id}" data-k="precio" value="${esc(i.precio)}" class="num" style="text-align:right" placeholder="Pendiente" aria-label="Precio sin IVA"></td>
+    <td data-label="IVA"><select id="in-iva-${i.id}" data-k="iva" aria-label="Tipo de IVA">${['','0','4','5','10','21'].map(v=>`<option value="${v}" ${String(i.iva??'')===v?'selected':''}>${v===''?'—':v+' %'}</option>`).join('')}</select></td>
+    <td data-label="Precio con IVA" class="r num" data-o="coniva">${conIvaCell(i,c)}</td>
+    <td data-label="Nº unidades" class="r"><input type="number" min="0" step="1" id="in-u-${i.id}" data-k="unidades" value="${esc(i.unidades)}" class="num" style="text-align:right" placeholder="1" aria-label="Número de unidades"></td>
+    <td data-label="Contenido de cada unidad">${i.medida==='ud'?'<span class="unit">1 ud</span>':`<span style="display:inline-flex;gap:4px"><input type="number" min="0" step="any" id="in-c-${i.id}" data-k="contenido" value="${esc(i.contenido)}" class="num" style="text-align:right" placeholder="—" aria-label="Contenido"><select id="in-cu-${i.id}" data-k="contenidoUd" aria-label="Unidad del contenido">${cUds.map(x=>`<option ${x===i.contenidoUd?'selected':''}>${x}</option>`).join('')}</select></span>`}</td>
+    <td data-label="Formato"><input type="text" id="in-fo-${i.id}" data-k="formato" value="${esc(i.formato)}" placeholder="Saco, bote…" style="min-width:110px" aria-label="Formato de compra"></td>
+    <td data-label="Merma %" class="r"><input type="number" min="0" max="99" step="0.5" id="in-me-${i.id}" data-k="merma" value="${esc(i.merma)}" class="num" style="text-align:right;width:76px" placeholder="0" aria-label="Merma %"></td>
+    <td data-label="Coste (IVA incl.)" class="r num cost-cell" data-o="neto">${c?'<b>'+eur(c.neto)+'</b> <span class="unit">/'+c.base+'</span>':'<span class="miss">Sin precio</span>'}</td>
+    <td data-label="Recetas" class="r num">${u}</td>
+    <td class="del" data-o="del">${u?'':`<button class="btn ghost small" data-act="del-ing" aria-label="Eliminar ingrediente">✕</button>`}</td>
   </tr>`;
 }
 
@@ -601,7 +653,9 @@ function ingRow(i){
 function vAjustes(){
   const st=S.settings;
   return `<section class="view">
-  <div><h2 class="h-sec">Ajustes</h2><div class="sub">Valores para esta sesión de trabajo.</div></div>
+  <div class="bar"><div class="grow"><h2 class="h-sec">Ajustes</h2><div class="sub">Zona de la profesora. Los cambios en precios y nombres de ingredientes se guardan con GUARDAR.</div></div>
+    <button class="btn-save ${ingDirty?'dirty':''}" id="btn-guardar" data-act="guardar"><span class="dot" aria-hidden="true"></span>GUARDAR</button></div>
+  ${ingDirty?'<div class="notice">Hay cambios en «Ingredientes y precios» sin guardar.</div>':''}
   <div class="two">
     <div class="panel" style="display:grid;gap:12px"><h3 style="margin:0">Valores por defecto</h3>
       <div class="fields">
@@ -668,14 +722,14 @@ async function pdfReceta(r){
   y=doc.lastAutoTable.finalY+5;
   // Escandallo
   const body=r.lineas.map((l,i)=>{ const info=s.lines[i]; const sh=info.coste!=null&&s.total?info.coste/s.total:null;
-    return [T(refName(l)||'—'), T(info.src&&info.src.proveedor?info.src.proveedor:''), T((num(l.cant)!=null?fmt(num(l.cant),3):'—')+' '+(l.ud||'')), T(info.unit!=null?eur(info.unit)+' /'+info.base:'sin precio'), T(info.coste!=null?eur(info.coste,3):'—'), T(sh!=null?pct(sh):'')]; });
-  doc.autoTable({startY:y,head:[['Ingrediente','Proveedor','Cantidad','Coste unit. (IVA incl.)','Coste','%']].map(rw=>rw.map(T)),body,
-    foot:[[T('Coste total de la receta'),'','','',T(s.total!=null?eur(s.total):'—'),''],[T('Coste por ración'),'','','',T(s.racion!=null?eur(s.racion):'—'),'']],
+    return [T(refName(l)||'—'), T((num(l.cant)!=null?fmt(num(l.cant),3):'—')+' '+(l.ud||'')), T(info.unit!=null?eur(info.unit)+' /'+info.base:'sin precio'), T(info.coste!=null?eur(info.coste,3):'—'), T(sh!=null?pct(sh):'')]; });
+  doc.autoTable({startY:y,head:[['Ingrediente','Cantidad','Coste unitario (IVA incl.)','Coste','% del total']].map(rw=>rw.map(T)),body,
+    foot:[[T('Coste total de la receta'),'','',T(s.total!=null?eur(s.total):'—'),''],[T('Coste por ración'),'','',T(s.racion!=null?eur(s.racion):'—'),'']],
     theme:'grid',margin:{left:M,right:M},showFoot:'lastPage',
     styles:{fontSize:8.6,cellPadding:1.6,textColor:INK,lineColor:LINE,lineWidth:.15},
     headStyles:{fillColor:SOFT,textColor:INK,fontStyle:'bold',fontSize:7.8},
     footStyles:{fillColor:[255,255,255],textColor:INK,fontStyle:'bold'},
-    columnStyles:{0:{cellWidth:56},1:{cellWidth:38,textColor:MUT},2:{halign:'right'},3:{halign:'right'},4:{halign:'right'},5:{halign:'right'}}});
+    columnStyles:{0:{cellWidth:70},1:{halign:'right'},2:{halign:'right'},3:{halign:'right'},4:{halign:'right'}}});
   y=doc.lastAutoTable.finalY+4;
   if(inc){ const msg=doc.splitTextToSize(T('Escandallo incompleto: faltan precios de '+s.falta.join(', ')+'.'),CW-6); const h=msg.length*4+4;
     doc.setFillColor(251,235,207); doc.roundedRect(M,y,CW,h,1.5,1.5,'F'); doc.setTextColor(122,71,0); doc.setFontSize(8.6); doc.text(msg,M+3,y+5); y+=h+3; }
@@ -742,7 +796,8 @@ document.addEventListener('click',e=>{
   switch(act){
     case 'nueva': nuevaReceta(); break;
     case 'desbloquear': pedirPin(()=>render()); break;
-    case 'guardar': if(desbloqueado) guardarPrecios(); else pedirPin(()=>{ guardarPrecios(); if(ui.tab==='ajustes') render(); },'Guardar cambios de precios'); break;
+    case 'guardar': if(desbloqueado) guardarPrecios(); break;
+    case 'ir-ajustes': setTab('ajustes'); if(!desbloqueado) pedirPin(()=>render()); break;
     case 'volver': ui.ficha=null; setTab('recetario'); break;
     case 'add-linea': r.lineas.push({ref:'',cant:'',ud:'g'}); save(); redrawLines(r); $(`#ln-n-${r.lineas.length-1}`)?.focus(); break;
     case 'del-linea': r.lineas.splice(+b.dataset.i,1); save(); redrawLines(r); break;
@@ -797,7 +852,7 @@ document.addEventListener('change',e=>{
   if(fid&&t.dataset.alg){ const r=recById(fid); const a=t.dataset.alg; r.alergenos = t.checked? [...new Set([...r.alergenos,a])] : r.alergenos.filter(x=>x!==a); save(); return; }
   if(fid&&t.dataset.f==='rendimiento'){ return; }
   if(t.closest('tr[data-ing]')&&t.dataset.k==='medida'){ const ing=ingById(t.closest('tr').dataset.ing); ing.contenidoUd= ing.medida==='L'?'L':'kg'; if(ing.medida==='ud') ing.contenido=''; save(); render(); return; }
-  if(t.id==='f-foto'&&t.files.length){ const r=recById(fid); const files=[...t.files].slice(0,MAX_FOTOS-(r.fotos||[]).length);
+  if(t.dataset.foto&&t.files.length){ const r=recById(fid); const files=[...t.files].slice(0,MAX_FOTOS-(r.fotos||[]).length);
     (async()=>{ for(const f of files){ try{ const d=await readPhoto(f); r.fotos=r.fotos||[]; r.fotos.push(await putFoto(d)); }catch(e){ toast('No se pudo leer una de las imágenes'); } } save(); render(); recalcFicha(); if(t.files.length>files.length) toast(`Máximo ${MAX_FOTOS} fotos por receta`); })(); return; }
   if((t.id==='imp-precios'||t.id==='imp-todo')&&t.files[0]){ const mode=t.id; const f=t.files[0]; f.text().then(txt=>importar(JSON.parse(txt),mode)).catch(()=>toast('El archivo no es una copia válida')).finally(()=>{t.value='';}); }
 });

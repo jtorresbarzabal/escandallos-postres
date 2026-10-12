@@ -296,6 +296,13 @@ fieldset.ro[disabled] td.del,fieldset.ro[disabled] [data-act=del-ing]{display:no
 .ii-body > div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dotted var(--line);font-size:14px}
 .ii-body span{color:var(--muted)}
 .ii-body b{text-align:right}
+.mis-link{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--gold);border-radius:14px;padding:14px 16px;font-size:15px;cursor:pointer;color:var(--ink)}
+.mis-link b{color:var(--gold-ink)}
+.mis-link > span:last-child{font-size:24px;color:var(--gold)}
+.warn-t{color:var(--warn);font-weight:700}
+.tab .count[hidden]{display:none}
+.tab .sm{display:none}
+@media (max-width:640px){.tab .lg,#c-ing{display:none}.tab .sm{display:inline;font-size:18px}.tabs-in .tab{padding:12px 11px;font-size:15px}.tabs-in{gap:2px}}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:30px;font-weight:600;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
 .confirm{display:inline-flex;gap:6px;align-items:center;background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:4px 8px;font-size:13px;font-weight:600}
 .notice{background:var(--warn-soft);color:var(--warn);border-radius:var(--r);padding:10px 14px;font-size:14px;font-weight:600}
@@ -315,9 +322,10 @@ footer{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:0 30px;c
 <nav class="tabs" aria-label="Secciones">
   <div class="tabs-wrap"><div class="tabs-in" role="tablist">
     <button class="tab" role="tab" data-tab="recetario" id="t-recetario">Inicio</button>
+    <button class="tab" role="tab" data-tab="mis" id="t-mis">Mis recetas<span class="count" id="c-mis"></span></button>
     <button class="tab" role="tab" data-tab="ficha" id="t-ficha" hidden>Ficha técnica</button>
-    <button class="tab" role="tab" data-tab="ingredientes" id="t-ingredientes">Ingredientes y precios<span class="count" id="c-ing"></span></button>
-    <button class="tab" role="tab" data-tab="ajustes" id="t-ajustes">Ajustes</button>
+    <button class="tab" role="tab" data-tab="ingredientes" id="t-ingredientes">Ingredientes<span class="lg"> y precios</span><span class="count" id="c-ing"></span></button>
+    <button class="tab" role="tab" data-tab="ajustes" id="t-ajustes" aria-label="Ajustes"><span class="sm" aria-hidden="true">⚙︎</span><span class="lg">Ajustes</span></button>
   </div>
   </div>
 </nav>
@@ -530,6 +538,7 @@ function setTab(t){
 }
 $('.tabs-in').addEventListener('click',e=>{ const b=e.target.closest('.tab'); if(!b) return; if(b.dataset.tab==='ajustes'&&!desbloqueado){ setTab('ajustes'); pedirPin(()=>render()); return; } setTab(b.dataset.tab); });
 function counts(){
+  const nm=S.recetas.filter(r=>!r.ejemplo).length; const cm=$('#c-mis'); if(cm){ cm.textContent=nm||''; cm.hidden=!nm; }
   
   const sin=S.ingredientes.filter(i=>num(i.precio)==null).length;
   $('#c-ing').textContent= sin? sin+' sin precio' : S.ingredientes.length;
@@ -539,6 +548,7 @@ function render(){
   const m=$('#main');
   const notice = '<div class="notice" style="font-weight:500"><b>Tus recetas y fotos se guardan solo en este dispositivo.</b> Descarga el PDF para entregarlo o tener una copia segura.</div>';
   if(ui.tab==='recetario') m.innerHTML=vRecetario();
+  else if(ui.tab==='mis') m.innerHTML=vMis();
   else if(ui.tab==='ficha'&&ui.ficha&&recById(ui.ficha)) { m.innerHTML=notice+vFicha(recById(ui.ficha)); }
   else if(ui.tab==='ingredientes') m.innerHTML=notice+vIngredientes();
   else if(ui.tab==='ajustes') m.innerHTML= desbloqueado? vAjustes() : `<section class="lock panel"><h3>Ajustes · acceso de profesora</h3><div class="sub" style="margin-bottom:12px">Esta sección necesita código de acceso.</div><button class="btn primary" data-act="desbloquear">Introducir código</button></section>`;
@@ -569,10 +579,19 @@ function vRecetario(){
     <div class="st"><span class="n">2</span><div><b>Precio y fotos</b><p>Pon el PVP y haz la foto del postre terminado.</p></div></div>
     <div class="st"><span class="n">3</span><div><b>Descarga el PDF</b><p>Tu receta se guarda sola en este dispositivo. Descarga el PDF para entregarla.</p></div></div>
   </div>
-  ${mias.length?`<div class="group"><h2>Mis recetas</h2><div class="sub" style="margin:-4px 0 10px">Guardadas en este dispositivo (${mias.length}), con sus fotos. Si borras los datos del navegador, se pierden.</div>
-    ${pend?`<div class="notice" style="margin-bottom:12px">Tienes ${pend===1?'1 receta':pend+' recetas'} sin descargar en PDF.</div>`:''}
-    <div class="cards">${mias.map(card).join('')}</div></div>`:''}
+  ${mias.length?`<button class="mis-link" data-act="ir-mis"><span><b>Mis recetas</b> · ${mias.length===1?'1 receta guardada':mias.length+' recetas guardadas'}${pend?` · <span class="warn-t">${pend} sin PDF</span>`:''}</span><span aria-hidden="true">›</span></button>`:''}
   ${ej.length?`<div class="group"><h2>Recetas de ejemplo</h2><div class="sub" style="margin:-4px 0 10px">Ábrelas para ver cómo se rellena una ficha técnica completa.</div><div class="cards">${ej.map(card).join('')}</div></div>`:''}
+  </section>`;
+}
+function vMis(){
+  const mias=S.recetas.filter(r=>!r.ejemplo).sort((a,b)=>String(b.fecha||'').localeCompare(String(a.fecha||'')));
+  const pend=mias.filter(r=>!r.pdfOk).length;
+  return `<section class="view">
+  <div class="bar"><div class="grow"><h2 class="h-sec">Mis recetas</h2><div class="sub">Guardadas en este dispositivo, con sus fotos. Si borras los datos del navegador, se pierden: descarga siempre el PDF.</div></div>
+    <button class="btn primary" data-act="nueva">+ Nueva receta</button></div>
+  ${pend?`<div class="notice">Tienes ${pend===1?'1 receta':pend+' recetas'} sin descargar en PDF.</div>`:''}
+  ${mias.length? `<div class="cards">${mias.map(card).join('')}</div>`
+    : `<div class="empty">Todavía no tienes recetas.<br>Crea la primera y aparecerá aquí, guardada en este dispositivo.<br><br><button class="btn primary" data-act="nueva">+ Nueva receta</button></div>`}
   </section>`;
 }
 function card(r){
@@ -604,7 +623,7 @@ function refName(l){
 function vFicha(r){
   const cats=S.settings.categorias.includes(r.categoria)||!r.categoria?S.settings.categorias:[...S.settings.categorias,r.categoria];
   return `<section class="view" id="ficha" data-id="${r.id}">
-  <div class="bar"><button class="btn ghost" data-act="volver">← Inicio</button><div class="grow"></div>
+  <div class="bar"><button class="btn ghost" data-act="volver">← ${r.ejemplo?'Inicio':'Mis recetas'}</button><div class="grow"></div>
     <button class="btn primary" data-act="pdf">Descargar PDF</button>
     <span id="del-slot"><button class="btn danger" data-act="borrar-pedir">Eliminar</button></span></div>
   <div class="ficha-head">
@@ -1024,7 +1043,8 @@ document.addEventListener('click',e=>{
     case 'descartar': { const bg=document.createElement('div'); bg.className='modal-bg'; bg.innerHTML=`<div class="modal"><h3>¿Descartar los cambios?</h3><div class="sub">Se recuperan los precios y nombres guardados por última vez.</div><div class="bar"><button class="btn ghost" id="d-no">Cancelar</button><span class="grow"></span><button class="btn danger" id="d-si">Sí, descartar</button></div></div>`; document.body.appendChild(bg);
       bg.querySelector('#d-no').onclick=()=>bg.remove(); bg.querySelector('#d-si').onclick=()=>{ S.ingredientes=JSON.parse(ingSnap); ingDirty=false; nCambios=0; bg.remove(); render(); toast('Cambios descartados'); }; break; }
     case 'ir-ajustes': setTab('ajustes'); if(!desbloqueado) pedirPin(()=>render()); break;
-    case 'volver': ui.ficha=null; setTab('recetario'); break;
+    case 'volver': { const rr=recById(ui.ficha); ui.ficha=null; setTab(rr&&rr.ejemplo?'recetario':'mis'); break; }
+    case 'ir-mis': setTab('mis'); break;
     case 'add-linea': r.lineas.push({ref:'',cant:'',ud:'g'}); save(); redrawLines(r); $(`#ln-n-${r.lineas.length-1}`)?.focus(); break;
     case 'del-linea': r.lineas.splice(+b.dataset.i,1); save(); redrawLines(r); break;
     case 'crear-ing': if(!desbloqueado){ pedirPin(()=>{ render(); if(ui.tab==='ficha') recalcFicha(); toast('Código correcto: ya puedes crear el ingrediente'); },'Solo la profesora puede añadir ingredientes'); break; }
@@ -1036,7 +1056,7 @@ document.addEventListener('click',e=>{
     case 'pdf': pdfReceta(r); break;
     case 'borrar-pedir': $('#del-slot').innerHTML=`<span class="confirm">¿Eliminar la receta? <button class="btn small danger" data-act="borrar">Sí, eliminar</button><button class="btn small ghost" data-act="borrar-no">No</button></span>`; break;
     case 'borrar-no': $('#del-slot').innerHTML='<button class="btn danger" data-act="borrar-pedir">Eliminar</button>'; break;
-    case 'borrar': (r.fotos||[]).forEach(delFoto); fotosBorrar(r.id); S.recetas=S.recetas.filter(x=>x.id!==r.id); S.recetas.forEach(x=>x.lineas.forEach(l=>{ if(l.ref==='r:'+r.id) l.ref='?:'+r.nombre; })); save(); ui.ficha=null; setTab('recetario'); toast('Receta eliminada'); break;
+    case 'borrar': (r.fotos||[]).forEach(delFoto); fotosBorrar(r.id); S.recetas=S.recetas.filter(x=>x.id!==r.id); S.recetas.forEach(x=>x.lineas.forEach(l=>{ if(l.ref==='r:'+r.id) l.ref='?:'+r.nombre; })); save(); ui.ficha=null; setTab('mis'); toast('Receta eliminada'); break;
     case 'quitar-foto': { const k=+b.dataset.k; const [f]=r.fotos.splice(k,1); delFoto(f); fotosGuardar(r); if(!r.fotos.length) r.mini=''; else miniatura(r.fotos[0]).then(m=>{ r.mini=m; save(); }); save(); render(); recalcFicha(); break; }
     case 'add-ing': { const ing={id:uid(),nombre:'Nuevo ingrediente',familia:ui.ifam!=='Todas'?ui.ifam:'Otros',medida:'kg',formato:'',proveedor:'',albaran:'',fecha:'',precio:'',iva:'',unidades:'',contenido:'',contenidoUd:'kg',merma:''}; S.ingredientes.push(ing); save(); marcarIng(); ui.iq=''; render(); const el=$(`#in-n-${ing.id}`); el?.focus(); el?.select(); break; }
     case 'del-ing': { const tr=b.closest('tr'); S.ingredientes=S.ingredientes.filter(x=>x.id!==tr.dataset.ing); save(); marcarIng(); tr.remove(); counts(); toast('Ingrediente eliminado'); break; }

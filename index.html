@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Escandallos y fichas técnicas de postres · Escuela de Hostelería San Roque">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Escandallos San Roque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: barra de marca fija arriba, pestañas como separadores de recetario; vistas en una columna ancha con paneles laterales que se apilan en móvil */
+:root{
+  --bg:#F7F6F2; --surface:#FFFFFF; --sunk:#EFEDE6; --ink:#1C1B18; --muted:#6B675D; --line:#DEDAD0;
+  --gold:#B88A2E; --gold-ink:#7E5C14; --gold-soft:#F3E7C8; --on-gold:#1C1B18;
+  --ok:#2F7A4B; --ok-soft:#DDF0E3; --warn:#9A5B00; --warn-soft:#FBEBCF; --bad:#B23A2E; --bad-soft:#F8DEDA;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Manrope","Segoe UI",system-ui,sans-serif;
+  --r:10px; --brand-bg:#1C1B18; --brand-fg:#F2EEE5; --brand-gold:#D8B262;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141310; --surface:#1D1B17; --sunk:#26231E; --ink:#EEE9DE; --muted:#A9A296; --line:#36322B;
+  --gold:#D8B262; --gold-ink:#E6C77F; --gold-soft:#3A3020; --on-gold:#1C1B18;
+  --ok:#6FC08C; --ok-soft:#1E3326; --warn:#F0B158; --warn-soft:#3A2C14; --bad:#F08A7E; --bad-soft:#3D1F1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141310; --surface:#1D1B17; --sunk:#26231E; --ink:#EEE9DE; --muted:#A9A296; --line:#36322B;
+  --gold:#D8B262; --gold-ink:#E6C77F; --gold-soft:#3A3020; --on-gold:#1C1B18;
+  --ok:#6FC08C; --ok-soft:#1E3326; --warn:#F0B158; --warn-soft:#3A2C14; --bad:#F08A7E; --bad-soft:#3D1F1B; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+button,input,select,textarea{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Cabecera */
+.brand{background:var(--brand-bg);color:var(--brand-fg);padding-inline:16px}
+.brand-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:16px;padding-block:14px;flex-wrap:wrap}
+.brand img{width:64px;height:64px;border-radius:50%;flex:none;background:#fff}
+.brand-txt{min-width:0;flex:1}
+.brand-txt .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.75}
+.brand-txt h1{font-size:clamp(22px,3.2vw,30px);font-weight:800;color:var(--brand-gold)}
+.brand .meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;opacity:.92;margin-top:4px}
+.brand .meta b{font-weight:600;color:var(--brand-gold)}
+.btn-save{flex:none;display:inline-flex;align-items:center;gap:8px;background:var(--brand-gold);color:#1C1B18;border:0;border-radius:10px;padding:9px 20px;margin-block:6px;font-family:var(--f-display);font-weight:800;font-size:15px;letter-spacing:.08em;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.btn-save:hover{filter:brightness(1.08)}
+.btn-save .dot{width:9px;height:9px;border-radius:50%;background:#1C1B18;opacity:.25}
+.btn-save.dirty{box-shadow:0 0 0 3px rgba(216,178,98,.45),0 2px 0 rgba(0,0,0,.25);animation:pulse 1.6s ease-in-out infinite}
+.btn-save.dirty .dot{background:#B23A2E;opacity:1}
+@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(216,178,98,.15),0 2px 0 rgba(0,0,0,.25)}}
+@media (max-width:560px){.btn-save{padding:8px 12px;font-size:13px}}
+.modal-bg{position:fixed;inset:0;background:rgba(20,19,16,.55);display:grid;place-items:center;z-index:30;padding:16px}
+.modal{background:var(--surface);border-radius:14px;padding:22px;max-width:360px;width:100%;display:grid;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.modal h3{font-size:19px}
+.pin-in{font-size:24px;letter-spacing:.4em;text-align:center;font-variant-numeric:tabular-nums}
+.pin-err{color:var(--bad);font-size:13px;font-weight:600;min-height:18px}
+.lock{max-width:380px;margin:30px auto;text-align:center}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding-inline:16px}
+.tabs-wrap{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.tabs-in{flex:1;min-width:0;display:flex;gap:4px;overflow-x:auto;padding-top:8px;align-self:flex-end}
+.tab{border:1px solid transparent;border-bottom:none;background:none;padding:9px 16px;border-radius:10px 10px 0 0;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;margin-bottom:-1px}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);border-color:var(--line);box-shadow:inset 0 3px 0 var(--gold)}
+.tab .count{font-size:12px;background:var(--sunk);border-radius:20px;padding:1px 7px;margin-left:6px;color:var(--muted)}
+
+main{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:22px 60px}
+.view{display:grid;gap:18px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.bar .grow{flex:1;min-width:180px}
+.h-sec{font-size:22px;font-weight:700}
+.sub{color:var(--muted);font-size:14px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--gold)}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:var(--on-gold)}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--ink);border-color:var(--line)}
+.btn.danger{color:var(--bad)}
+.btn.small{padding:5px 10px;font-size:13px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+input[type=text],input[type=number],input[type=date],input[type=search],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 3px var(--gold-soft)}
+textarea{resize:vertical;min-height:90px;line-height:1.5}
+label.f{display:grid;gap:4px;font-size:13px;color:var(--muted);font-weight:600;min-width:0}
+label.f > span small{font-weight:500}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.panel h3{font-size:17px;margin-bottom:12px}
+.tip{background:var(--gold-soft);border-radius:var(--r);padding:12px 14px;font-size:14px}
+.tip b{color:var(--gold-ink)}
+
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;border-radius:20px;padding:2px 9px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.neutral{background:var(--sunk);color:var(--muted)}
+
+/* Recetario */
+.cats{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.group h2{font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink);font-family:var(--f-body);font-weight:700;margin-bottom:10px;display:flex;gap:10px;align-items:center}
+.group h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;cursor:pointer;display:grid;gap:10px;align-content:start}
+.card:hover{border-color:var(--gold)}
+.card .t{font-family:var(--f-display);font-weight:700;font-size:17px;line-height:1.2}
+.card .who{font-size:13px;color:var(--muted)}
+.card .figs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;border-top:1px dashed var(--line);padding-top:10px}
+.fig small{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.fig b{font-size:15px}
+.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;max-width:100%}
+.empty{border:2px dashed var(--line);border-radius:var(--r);padding:28px;text-align:center;color:var(--muted)}
+
+/* Ficha */
+.ficha-head{display:grid;gap:10px}
+.title-in{font-family:var(--f-display);font-size:clamp(22px,3vw,30px);font-weight:700;border:none;border-bottom:2px solid var(--line);border-radius:0;background:transparent;padding:4px 0}
+.title-in:focus{box-shadow:none;border-color:var(--gold)}
+.ficha-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
+@media (max-width:900px){.ficha-grid{grid-template-columns:1fr}}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.results{position:sticky;top:64px;display:grid;gap:12px}
+@media (max-width:900px){.results{position:static}}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.big .k{background:var(--sunk);border-radius:8px;padding:10px 12px}
+.big .k small{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.big .k b{font-family:var(--f-display);font-size:24px;font-weight:700}
+.rows{display:grid;gap:6px;font-size:14px}
+.rows > div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dotted var(--line);padding-bottom:5px}
+.rows > div span:first-child{color:var(--muted)}
+.gauge{height:10px;border-radius:6px;background:var(--sunk);position:relative;overflow:hidden}
+.gauge i{position:absolute;inset:0 auto 0 0;border-radius:6px;background:var(--ok)}
+.gauge .mark{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink)}
+.inline2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 8px;background:var(--sunk);font-weight:700;white-space:nowrap}
+td{padding:6px 8px;border-top:1px solid var(--line);vertical-align:middle}
+td.r,th.r{text-align:right}
+td input,td select{padding:6px 8px}
+.lines td:first-child{min-width:210px}
+.share{display:flex;align-items:center;gap:6px;min-width:90px}
+.share .b{height:6px;border-radius:4px;background:var(--gold);min-width:2px}
+.miss{color:var(--warn);font-weight:600;font-size:13px}
+.linkbtn{background:none;border:none;color:var(--gold-ink);text-decoration:underline;cursor:pointer;padding:0;font-weight:600;font-size:13px}
+.alg{display:flex;flex-wrap:wrap;gap:6px}
+.alg label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:14px;background:var(--surface)}
+.alg input{accent-color:var(--gold)}
+.alg label:has(input:checked){background:var(--gold-soft);border-color:var(--gold);font-weight:600}
+.texts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.photo{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.photo img{width:220px;max-width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+
+/* Ingredientes */
+.ing-tbl td{white-space:nowrap}
+.ing-tbl td:first-child,.ing-tbl th:first-child{position:sticky;left:0;z-index:1;background:var(--surface);box-shadow:1px 0 0 var(--line)}
+.ing-tbl th:first-child{background:var(--sunk)}
+.ing-tbl input[type=text]{min-width:170px}
+.ing-tbl input[type=number]{width:92px}
+.ing-tbl input[type=date]{width:140px}
+.ing-tbl select{width:auto}
+.cost-cell b{font-size:15px}
+.unit{color:var(--muted);font-size:12px}
+
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.two{grid-template-columns:1fr}}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.gallery figure{margin:0;position:relative}
+.gallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
+.gallery figure button{position:absolute;top:6px;right:6px}
+.gallery .add{border:2px dashed var(--line);border-radius:8px;aspect-ratio:4/3;display:grid;place-items:center;text-align:center;color:var(--muted);cursor:pointer;font-weight:600;padding:10px}
+.gallery .add:hover{border-color:var(--gold);color:var(--ink)}
+.iva-chip{font-size:11px;font-weight:700;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:30px;font-weight:600;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
+.confirm{display:inline-flex;gap:6px;align-items:center;background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:4px 8px;font-size:13px;font-weight:600}
+.notice{background:var(--warn-soft);color:var(--warn);border-radius:var(--r);padding:10px 14px;font-size:14px;font-weight:600}
+footer{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:0 30px;color:var(--muted);font-size:12px}
+</style>
+
+<header class="brand">
+  <div class="brand-in">
+    <img src="data:image/jpeg;base64,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" alt="Logotipo Escuela de Hostelería San Roque">
+    <div class="brand-txt">
+      <div class="eyebrow">Escuela de Hostelería San Roque</div>
+      <h1>Escandallos de Postres</h1>
+      <div class="meta"><span>Módulo profesional: <b>Postres en Restauración</b></span><span>Profesora: <b>Eva Díaz Campos</b></span></div>
+    </div>
+  </div>
+</header>
+<nav class="tabs" aria-label="Secciones">
+  <div class="tabs-wrap"><div class="tabs-in" role="tablist">
+    <button class="tab" role="tab" data-tab="recetario" id="t-recetario">Recetario<span class="count" id="c-rec"></span></button>
+    <button class="tab" role="tab" data-tab="ficha" id="t-ficha" hidden>Ficha técnica</button>
+    <button class="tab" role="tab" data-tab="ingredientes" id="t-ingredientes">Ingredientes y precios<span class="count" id="c-ing"></span></button>
+    <button class="tab" role="tab" data-tab="ajustes" id="t-ajustes">Ajustes</button>
+  </div>
+  <button class="btn-save" id="btn-guardar" data-act="guardar" title="Guarda los cambios en precios y nombres de ingredientes"><span class="dot" aria-hidden="true"></span>GUARDAR</button>
+  </div>
+</nav>
+<main id="main"></main>
+<footer>Herramienta didáctica de escandallos · Escuela de Hostelería San Roque · Las recetas no se guardan: descarga el PDF antes de cerrar.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script>
+(()=>{
+"use strict";
+const LOGO = document.querySelector('.brand img').src;
+const KEY = 'ehsr-escandallos-postres-v1';
+const ALERGENOS = ['Gluten','Crustáceos','Huevo','Pescado','Cacahuetes','Soja','Lácteos','Frutos de cáscara','Apio','Mostaza','Sésamo','Sulfitos','Altramuces','Moluscos'];
+const FAMILIAS = ['Harinas y féculas','Azúcares','Lácteos y huevos','Grasas y aceites','Chocolates y cacao','Frutos secos','Frutas','Frutas confitadas y secas','Purés y frutas congeladas','Rellenos y preparados','Gelificantes y aditivos','Aromas y colorantes','Masas y preelaborados','Licores','Otros'];
+const CATS_DEF = ['Postres de cuchara','Tartas y pasteles','Masas y bases','Cremas y rellenos','Helados y sorbetes','Postres de frutas','Chocolate y petits fours','Salsas y coulis'];
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = ()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3);
+const num = v=>{ if(v===''||v==null) return null; const n=typeof v==='number'?v:parseFloat(String(v).replace(',','.')); return isFinite(n)?n:null; };
+const eur = (v,d=2)=> v==null||!isFinite(v)?'—':v.toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d})+' €';
+const pct = v=> v==null||!isFinite(v)?'—':(v*100).toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1})+' %';
+const fmt = (v,d=2)=> v==null||!isFinite(v)?'—':v.toLocaleString('es-ES',{maximumFractionDigits:d});
+const today = ()=>new Date().toISOString().slice(0,10);
+const norm = s=>String(s||'').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+
+/* ---------- Datos iniciales ---------- */
+function seed(){
+  const ings=PRECIOS_CENTRO.items.map((x,k)=>({id:'c'+k,...x}));
+  const by=n=>ings.find(i=>i.nombre===n).id;
+  const crema={id:uid(),nombre:'Crema pastelera (ejemplo)',categoria:'Cremas y rellenos',alumno:'Ejemplo',fecha:today(),porcionTam:'',porciones:'',rendimiento:1350,tPrep:'15 min',tCoc:'8 min',tempServ:'Fría (4 °C)',pvp:'',iva:10,
+    lineas:[{ref:'i:'+by('Leche entera'),cant:1000,ud:'ml'},{ref:'i:'+by('Yema de huevo pasteurizada'),cant:160,ud:'g'},{ref:'i:'+by('Azúcar blanco'),cant:200,ud:'g'},{ref:'i:'+by('Fécula de maíz (maicena)'),cant:80,ud:'g'},{ref:'i:'+by('Aroma de vainilla Bourbon'),cant:5,ud:'ml'}],
+    elaboracion:'1. Calentar la leche con el aroma de vainilla.\n2. Blanquear yemas con azúcar y añadir la maicena.\n3. Verter la leche caliente sobre la mezcla, volver al fuego y cocer sin dejar de remover hasta que espese y hierva 1 minuto.\n4. Enfriar rápidamente con film a piel.',
+    presentacion:'Elaboración base para rellenos (no se sirve sola).',equipo:'Cazo, varillas, bol, abatidor o baño de hielo, film.',alergenos:['Lácteos','Huevo'],fotos:[]};
+  const tarta={id:uid(),nombre:'Tarta de queso al horno (ejemplo)',categoria:'Tartas y pasteles',alumno:'Ejemplo',fecha:today(),porcionTam:'1 porción (≈110 g)',porciones:10,rendimiento:'',tPrep:'20 min',tCoc:'45 min a 170 °C',tempServ:'Fría (4–6 °C)',pvp:'',iva:10,
+    lineas:[{ref:'i:'+by('Queso crema KEN'),cant:600,ud:'g'},{ref:'i:'+by('Nata 35 % M.G. Debic'),cant:200,ud:'ml'},{ref:'i:'+by('Azúcar blanco'),cant:180,ud:'g'},{ref:'i:'+by('Huevo L'),cant:4,ud:'ud'},{ref:'i:'+by('Harina floja Brisa'),cant:20,ud:'g'}],
+    elaboracion:'1. Atemperar el queso.\n2. Mezclar queso y azúcar sin airear.\n3. Incorporar los huevos de uno en uno, después la nata y la harina tamizada.\n4. Hornear en molde encamisado a 170 °C durante 45 minutos.\n5. Enfriar y reservar en cámara mínimo 6 horas.',
+    presentacion:'Porción en plato de postre, acompañada de coulis de frutos rojos.',equipo:'Molde de 22 cm, papel de horno, varillas, bol, horno.',alergenos:['Gluten','Huevo','Lácteos'],fotos:[]};
+  return {settings:{alumno:'',curso:'',iva:10,objetivo:30,categorias:CATS_DEF.slice()},ingredientes:ings,recetas:[tarta,crema],preciosVersion:PRECIOS_CENTRO.version};
+}
+
+/* ---------- Precios del centro (albaranes) ---------- */
+/* Precios reales de los albaranes del curso 2025/2026 (sin IVA + tipo de IVA). Prioridad: Joaquín López Aragón; si no lo vende, último precio de otro proveedor. Al cambiar la lista, subir "version". */
+const PRECIOS_CENTRO = {version:1, curso:'2025/2026', items:[{"nombre": "Harina floja Brisa", "familia": "Harinas y féculas", "medida": "kg", "formato": "Saco 25 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "28.281", "fecha": "2026-09-29", "precio": 1.15, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Harina de repostería Espuma", "familia": "Harinas y féculas", "medida": "kg", "formato": "Saco 25 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "28.281", "fecha": "2026-09-29", "precio": 1.12, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Harina de fuerza Huracán", "familia": "Harinas y féculas", "medida": "kg", "formato": "Saco 25 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "28.281", "fecha": "2026-09-29", "precio": 1.21, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Fécula de maíz (maicena)", "familia": "Harinas y féculas", "medida": "kg", "formato": "Saco 25 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "28.281", "fecha": "2026-09-29", "precio": 1.75, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Azúcar glas Surfin", "familia": "Azúcares", "medida": "kg", "formato": "Saco 14 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "28.281", "fecha": "2026-09-29", "precio": 3.36, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Cacao en polvo Amaro Elenka", "familia": "Chocolates y cacao", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "28.281", "fecha": "2026-09-29", "precio": 22.9, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Almendra entera Borges", "familia": "Frutos secos", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "28.281", "fecha": "2026-09-29", "precio": 17.31, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Almendra molida (harina de almendra) Borges", "familia": "Frutos secos", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "28.281", "fecha": "2026-09-29", "precio": 12.95, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Nueces mitades", "familia": "Frutos secos", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "28.281", "fecha": "2026-09-29", "precio": 9.11, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Avellana tostada repelada Borges", "familia": "Frutos secos", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "28.281", "fecha": "2026-09-29", "precio": 21.72, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Coco rallado Puratos", "familia": "Frutos secos", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "28.281", "fecha": "2026-09-29", "precio": 5.93, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Puré de mango congelado", "familia": "Purés y frutas congeladas", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "28.281", "fecha": "2026-09-29", "precio": 11.11, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Pistacho crudo repelado Borges", "familia": "Frutos secos", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "2.727", "fecha": "2026-02-03", "precio": 42.8, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Puré de frutas del bosque congelado", "familia": "Purés y frutas congeladas", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "2.727", "fecha": "2026-02-03", "precio": 12.6, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Puré de frambuesa congelado", "familia": "Purés y frutas congeladas", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "2.727", "fecha": "2026-02-03", "precio": 14.83, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Almendra laminada", "familia": "Frutos secos", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "2.079", "fecha": "2026-01-27", "precio": 13.0, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Puré de manzana verde congelado", "familia": "Purés y frutas congeladas", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "2.079", "fecha": "2026-01-27", "precio": 7.64, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Puré de piña congelado", "familia": "Purés y frutas congeladas", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "2.079", "fecha": "2026-01-27", "precio": 9.94, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Pectina NH nappage", "familia": "Gelificantes y aditivos", "medida": "kg", "formato": "Bote 600 g", "proveedor": "Joaquín López Aragón", "albaran": "2.075", "fecha": "2026-01-27", "precio": 41.0, "iva": 10, "unidades": "", "contenido": 600, "contenidoUd": "g", "merma": ""}, {"nombre": "Pectina nappage", "familia": "Gelificantes y aditivos", "medida": "kg", "formato": "Bote 550 g", "proveedor": "Joaquín López Aragón", "albaran": "851", "fecha": "2026-01-13", "precio": 34.0, "iva": 10, "unidades": "", "contenido": 550, "contenidoUd": "g", "merma": ""}, {"nombre": "Colorante líquido amarillo Dekora (aerógrafo)", "familia": "Aromas y colorantes", "medida": "ud", "formato": "Bote", "proveedor": "Joaquín López Aragón", "albaran": "1.445", "fecha": "2026-01-20", "precio": 6.01, "iva": 10, "unidades": "", "contenido": "", "contenidoUd": "kg", "merma": ""}, {"nombre": "Puré de coco congelado", "familia": "Purés y frutas congeladas", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "1.445", "fecha": "2026-01-20", "precio": 11.34, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Dextrosa Delite", "familia": "Azúcares", "medida": "kg", "formato": "Caja 2 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "1.445", "fecha": "2026-01-20", "precio": 6.71, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Gelatina de brillo Miroir", "familia": "Gelificantes y aditivos", "medida": "kg", "formato": "Caja 5 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "1.445", "fecha": "2026-01-20", "precio": 5.48, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Aroma de vainilla Bourbon", "familia": "Aromas y colorantes", "medida": "L", "formato": "Bote 100 ml", "proveedor": "Joaquín López Aragón", "albaran": "1.433", "fecha": "2026-01-20", "precio": 3.6, "iva": 10, "unidades": "", "contenido": 100, "contenidoUd": "ml", "merma": ""}, {"nombre": "Neutralín (estabilizante para helados)", "familia": "Gelificantes y aditivos", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "1.429", "fecha": "2026-01-20", "precio": 36.7, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Chocolate en barritas 44 %", "familia": "Chocolates y cacao", "medida": "kg", "formato": "Caja 1,6 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "851", "fecha": "2026-01-13", "precio": 15.67, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Albúmina en polvo Delite", "familia": "Lácteos y huevos", "medida": "kg", "formato": "Caja 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "851", "fecha": "2026-01-13", "precio": 31.57, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Puré de fruta de la pasión congelado", "familia": "Purés y frutas congeladas", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "851", "fecha": "2026-01-13", "precio": 12.5, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Miel El Pinsapar", "familia": "Azúcares", "medida": "kg", "formato": "Bote 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "851", "fecha": "2026-01-13", "precio": 6.88, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Clara de huevo líquida pasteurizada", "familia": "Lácteos y huevos", "medida": "L", "formato": "Brick 1 L", "proveedor": "Joaquín López Aragón", "albaran": "851", "fecha": "2026-01-13", "precio": 2.56, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "L", "merma": ""}, {"nombre": "Choco Biscuit", "familia": "Chocolates y cacao", "medida": "kg", "formato": "Bolsa 2 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "35.703", "fecha": "2025-12-09", "precio": 4.71, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Crema de pistacho tostado 15 % Borges", "familia": "Rellenos y preparados", "medida": "kg", "formato": "Cubo 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "35.703", "fecha": "2025-12-09", "precio": 12.09, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Relleno caramelo salado Deli", "familia": "Rellenos y preparados", "medida": "kg", "formato": "Cubo 5 kg (precio/kg, dto. 10 %)", "proveedor": "Joaquín López Aragón", "albaran": "35.703", "fecha": "2025-12-09", "precio": 7.75, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Nata 35 % M.G. Debic", "familia": "Lácteos y huevos", "medida": "L", "formato": "Brick 1 L", "proveedor": "Joaquín López Aragón", "albaran": "35.703", "fecha": "2025-12-09", "precio": 3.94, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "L", "merma": ""}, {"nombre": "Agar-agar", "familia": "Gelificantes y aditivos", "medida": "kg", "formato": "Bote 400 g", "proveedor": "Joaquín López Aragón", "albaran": "35.070", "fecha": "2025-12-02", "precio": 18.5, "iva": 10, "unidades": "", "contenido": 400, "contenidoUd": "g", "merma": ""}, {"nombre": "Cabello de ángel Puratos", "familia": "Rellenos y preparados", "medida": "kg", "formato": "Lata 5,7 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "34.322", "fecha": "2025-11-25", "precio": 4.0, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Ciruelas pasas sin hueso", "familia": "Frutas confitadas y secas", "medida": "kg", "formato": "Caja 5 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "33.349", "fecha": "2025-11-13", "precio": 7.48, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Naranja confitada en discos Puradis", "familia": "Frutas confitadas y secas", "medida": "kg", "formato": "Caja 4,5 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "33.349", "fecha": "2025-11-13", "precio": 6.37, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Cobertura chocolate con leche Belcolade", "familia": "Chocolates y cacao", "medida": "kg", "formato": "Caja 5 kg (precio/kg, dto. 10 %)", "proveedor": "Joaquín López Aragón", "albaran": "33.349", "fecha": "2025-11-13", "precio": 15.85, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Cobertura chocolate blanco Belcolade", "familia": "Chocolates y cacao", "medida": "kg", "formato": "Caja 5 kg (precio/kg, dto. 10 %)", "proveedor": "Joaquín López Aragón", "albaran": "33.349", "fecha": "2025-11-13", "precio": 15.48, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Cobertura chocolate negro Belcolade", "familia": "Chocolates y cacao", "medida": "kg", "formato": "Caja 5 kg (precio/kg, dto. 10 %)", "proveedor": "Joaquín López Aragón", "albaran": "32.993", "fecha": "2025-11-11", "precio": 15.14, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Frambuesa liofilizada entera", "familia": "Frutas confitadas y secas", "medida": "kg", "formato": "Bote 60 g", "proveedor": "Joaquín López Aragón", "albaran": "32.993", "fecha": "2025-11-11", "precio": 9.67, "iva": 10, "unidades": "", "contenido": 60, "contenidoUd": "g", "merma": ""}, {"nombre": "Manteca de cerdo para masas Puratos", "familia": "Grasas y aceites", "medida": "kg", "formato": "Caja 17 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "31.563", "fecha": "2025-10-28", "precio": 3.07, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Impulsor Slow (levadura química)", "familia": "Gelificantes y aditivos", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "31.563", "fecha": "2025-10-28", "precio": 5.85, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Mazapán Puradis Suprema", "familia": "Rellenos y preparados", "medida": "kg", "formato": "Caja 4 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "30.838", "fecha": "2025-10-21", "precio": 7.85, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Pasas sultanas", "familia": "Frutas confitadas y secas", "medida": "kg", "formato": "Caja 5 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "30.838", "fecha": "2025-10-21", "precio": 5.56, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Cereza confitada roja Puradis", "familia": "Frutas confitadas y secas", "medida": "kg", "formato": "Caja 4 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "30.838", "fecha": "2025-10-21", "precio": 6.94, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Frutas del bosque congeladas (enteras)", "familia": "Purés y frutas congeladas", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "30.915", "fecha": "2025-10-21", "precio": 9.2, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Pipas de girasol peladas", "familia": "Frutos secos", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "29.356", "fecha": "2025-10-07", "precio": 3.09, "iva": "", "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Semilla de lino dorado", "familia": "Frutos secos", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Joaquín López Aragón", "albaran": "29.356", "fecha": "2025-10-07", "precio": 3.25, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Placas de hojaldre Aristo Primeur", "familia": "Masas y preelaborados", "medida": "kg", "formato": "Caja 5×2 kg (precio/kg)", "proveedor": "Joaquín López Aragón", "albaran": "29.356", "fecha": "2025-10-07", "precio": 7.31, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Levadura seca de panadería", "familia": "Gelificantes y aditivos", "medida": "kg", "formato": "Paquete 500 g", "proveedor": "Joaquín López Aragón", "albaran": "28.604", "fecha": "2025-09-30", "precio": 2.23, "iva": 10, "unidades": "", "contenido": 500, "contenidoUd": "g", "merma": ""}, {"nombre": "Leche entera", "familia": "Lácteos y huevos", "medida": "L", "formato": "Brick 1 L", "proveedor": "Abasthosur", "albaran": "00073066", "fecha": "2026-09-28", "precio": 1.04, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "L", "merma": ""}, {"nombre": "Mantequilla en bloque Soresina", "familia": "Grasas y aceites", "medida": "kg", "formato": "Bloque 1 kg", "proveedor": "Abasthosur", "albaran": "00073066", "fecha": "2026-09-28", "precio": 7.69, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Azúcar blanco", "familia": "Azúcares", "medida": "kg", "formato": "Saco 25 kg", "proveedor": "Abasthosur", "albaran": "00073066", "fecha": "2026-09-28", "precio": 20.69, "iva": 10, "unidades": "", "contenido": 25, "contenidoUd": "kg", "merma": ""}, {"nombre": "Café soluble Nescafé", "familia": "Aromas y colorantes", "medida": "kg", "formato": "Frasco 200 g", "proveedor": "Abasthosur", "albaran": "00073066", "fecha": "2026-09-28", "precio": 8.0, "iva": 10, "unidades": "", "contenido": 200, "contenidoUd": "g", "merma": ""}, {"nombre": "Aceite de girasol", "familia": "Grasas y aceites", "medida": "L", "formato": "Garrafa 10 L", "proveedor": "Abasthosur", "albaran": "00067720", "fecha": "2026-09-21", "precio": 18.88, "iva": 10, "unidades": "", "contenido": 10, "contenidoUd": "L", "merma": ""}, {"nombre": "Aceite de oliva virgen extra", "familia": "Grasas y aceites", "medida": "L", "formato": "Garrafa 5 L", "proveedor": "Abasthosur", "albaran": "00067720", "fecha": "2026-09-21", "precio": 23.08, "iva": 4, "unidades": "", "contenido": 5, "contenidoUd": "L", "merma": ""}, {"nombre": "Miel de caña", "familia": "Azúcares", "medida": "kg", "formato": "Frasco 900 g", "proveedor": "Abasthosur", "albaran": "00067720", "fecha": "2026-09-21", "precio": 4.99, "iva": 10, "unidades": "", "contenido": 900, "contenidoUd": "g", "merma": ""}, {"nombre": "Brandy 30º", "familia": "Licores", "medida": "L", "formato": "Garrafa 3 L", "proveedor": "Abasthosur", "albaran": "00067720", "fecha": "2026-09-21", "precio": 19.47, "iva": 21, "unidades": "", "contenido": 3, "contenidoUd": "L", "merma": ""}, {"nombre": "Leche semidesnatada sin lactosa", "familia": "Lácteos y huevos", "medida": "L", "formato": "Brick 1 L", "proveedor": "Abasthosur", "albaran": "00891745", "fecha": "2026-01-26", "precio": 1.2, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "L", "merma": ""}, {"nombre": "Yema de huevo pasteurizada", "familia": "Lácteos y huevos", "medida": "kg", "formato": "Brick 1 kg", "proveedor": "Distribuciones Chacón", "albaran": "852", "fecha": "2026-02-11", "precio": 12.5, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Leche de coco", "familia": "Lácteos y huevos", "medida": "L", "formato": "Lata 400 ml", "proveedor": "Distribuciones Chacón", "albaran": "852", "fecha": "2026-02-11", "precio": 1.9, "iva": 10, "unidades": "", "contenido": 400, "contenidoUd": "ml", "merma": ""}, {"nombre": "Queso crema KEN", "familia": "Lácteos y huevos", "medida": "kg", "formato": "Caja 3 kg", "proveedor": "Distribuciones Chacón", "albaran": "1640", "fecha": "2026-03-09", "precio": 20.35, "iva": 4, "unidades": "", "contenido": 3, "contenidoUd": "kg", "merma": ""}, {"nombre": "Queso mascarpone", "familia": "Lácteos y huevos", "medida": "kg", "formato": "Tarrina 500 g", "proveedor": "Distribuciones Chacón", "albaran": "506", "fecha": "2026-01-26", "precio": 6.5, "iva": 4, "unidades": "", "contenido": 500, "contenidoUd": "g", "merma": ""}, {"nombre": "Queso fresco", "familia": "Lácteos y huevos", "medida": "kg", "formato": "Pieza (precio/kg)", "proveedor": "Distribuciones Chacón", "albaran": "675", "fecha": "2026-02-02", "precio": 11.99, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Huevo líquido pasteurizado", "familia": "Lácteos y huevos", "medida": "L", "formato": "Brick 1 L", "proveedor": "Distribuciones Chacón", "albaran": "506", "fecha": "2026-01-26", "precio": 5.65, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "L", "merma": ""}, {"nombre": "Gelatina en hojas", "familia": "Gelificantes y aditivos", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Distribuciones Chacón", "albaran": "675", "fecha": "2026-02-02", "precio": 25.2, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Azúcar moreno", "familia": "Azúcares", "medida": "kg", "formato": "Paquete 800 g", "proveedor": "Distribuciones Chacón", "albaran": "517", "fecha": "2026-01-26", "precio": 2.2, "iva": 10, "unidades": "", "contenido": 800, "contenidoUd": "g", "merma": ""}, {"nombre": "Harina de trigo integral", "familia": "Harinas y féculas", "medida": "kg", "formato": "Paquete 1 kg", "proveedor": "Distribuciones Chacón", "albaran": "304", "fecha": "2026-01-16", "precio": 2.99, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Obleas", "familia": "Masas y preelaborados", "medida": "kg", "formato": "Paquete 150 g", "proveedor": "Distribuciones Chacón", "albaran": "506", "fecha": "2026-01-26", "precio": 2.6, "iva": 10, "unidades": "", "contenido": 150, "contenidoUd": "g", "merma": ""}, {"nombre": "Dátiles sin hueso", "familia": "Frutas confitadas y secas", "medida": "kg", "formato": "Bote 800 g", "proveedor": "Distribuciones Chacón", "albaran": "506", "fecha": "2026-01-26", "precio": 3.2, "iva": 10, "unidades": "", "contenido": 800, "contenidoUd": "g", "merma": ""}, {"nombre": "Galletas Chiquilín", "familia": "Masas y preelaborados", "medida": "kg", "formato": "Paquete 875 g", "proveedor": "Distribuciones Chacón", "albaran": "506", "fecha": "2026-01-26", "precio": 6.7, "iva": 10, "unidades": "", "contenido": 875, "contenidoUd": "g", "merma": ""}, {"nombre": "Piñón", "familia": "Frutos secos", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Distribuciones Chacón", "albaran": "10275", "fecha": "2025-12-12", "precio": 43.8, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Nata en spray KEN", "familia": "Lácteos y huevos", "medida": "kg", "formato": "Bote 500 g", "proveedor": "Distribuciones Chacón", "albaran": "675", "fecha": "2026-02-02", "precio": 3.65, "iva": 10, "unidades": "", "contenido": 500, "contenidoUd": "g", "merma": ""}, {"nombre": "Sal fina", "familia": "Aromas y colorantes", "medida": "kg", "formato": "Bolsa 1 kg", "proveedor": "Distribuciones Chacón", "albaran": "506", "fecha": "2026-01-26", "precio": 0.3, "iva": 10, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Ron blanco Mercader de Indias", "familia": "Licores", "medida": "L", "formato": "Botella 1 L", "proveedor": "Distribuciones Chacón", "albaran": "675", "fecha": "2026-02-02", "precio": 6.75, "iva": 21, "unidades": "", "contenido": 1, "contenidoUd": "L", "merma": ""}, {"nombre": "Vino Pedro Ximénez", "familia": "Licores", "medida": "L", "formato": "Botella 0,75 L", "proveedor": "Distribuciones Chacón", "albaran": "506", "fecha": "2026-01-26", "precio": 7.2, "iva": 21, "unidades": "", "contenido": 0.75, "contenidoUd": "L", "merma": ""}, {"nombre": "Limón", "familia": "Frutas", "medida": "kg", "formato": "Al peso", "proveedor": "Frutas Moreno", "albaran": "015282", "fecha": "2026-09-28", "precio": 1.85, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Naranja", "familia": "Frutas", "medida": "kg", "formato": "Al peso (calibre 6)", "proveedor": "Frutas Moreno", "albaran": "015282", "fecha": "2026-09-28", "precio": 1.55, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Manzana Golden", "familia": "Frutas", "medida": "kg", "formato": "Al peso", "proveedor": "Frutas Moreno", "albaran": "015282", "fecha": "2026-09-28", "precio": 2.25, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Pera Conferencia", "familia": "Frutas", "medida": "kg", "formato": "Al peso", "proveedor": "Frutas Moreno", "albaran": "015282", "fecha": "2026-09-28", "precio": 2.95, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Plátano", "familia": "Frutas", "medida": "kg", "formato": "Al peso", "proveedor": "Frutas Moreno", "albaran": "015282", "fecha": "2026-09-28", "precio": 2.2, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Membrillo", "familia": "Frutas", "medida": "kg", "formato": "Al peso", "proveedor": "Frutas Moreno", "albaran": "015282", "fecha": "2026-09-28", "precio": 2.6, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Mango", "familia": "Frutas", "medida": "kg", "formato": "Al peso", "proveedor": "Frutas Moreno", "albaran": "015282", "fecha": "2026-09-28", "precio": 4.4, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Boniato", "familia": "Frutas", "medida": "kg", "formato": "Al peso", "proveedor": "Frutas Moreno", "albaran": "015282", "fecha": "2026-09-28", "precio": 1.55, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Calabaza", "familia": "Frutas", "medida": "kg", "formato": "Al peso", "proveedor": "Frutas Moreno", "albaran": "015282", "fecha": "2026-09-28", "precio": 1.45, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Zanahoria", "familia": "Frutas", "medida": "kg", "formato": "Bolsa (al peso)", "proveedor": "Frutas Moreno", "albaran": "015282", "fecha": "2026-09-28", "precio": 0.95, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}, {"nombre": "Huevo L", "familia": "Lácteos y huevos", "medida": "ud", "formato": "Docena", "proveedor": "Frutas Moreno", "albaran": "019263", "fecha": "2024-09-25", "precio": 2.35, "iva": 4, "unidades": 12, "contenido": "", "contenidoUd": "kg", "merma": ""}, {"nombre": "Grosella roja", "familia": "Frutas", "medida": "kg", "formato": "Tarrina", "proveedor": "Frutas Moreno", "albaran": "021075", "fecha": "2024-10-24", "precio": 6.8, "iva": 4, "unidades": "", "contenido": 1, "contenidoUd": "kg", "merma": ""}]};
+const MAX_FOTOS = 6;
+
+/* ---------- Estado (solo en memoria: no se guarda nada en el dispositivo) ---------- */
+let S=seed();
+// Limpieza de datos que guardaban versiones anteriores de la app
+try{ localStorage.removeItem(KEY); sessionStorage.removeItem(KEY+'-tab'); }catch(e){}
+try{ indexedDB.deleteDatabase('ehsr-escandallos-fotos'); }catch(e){}
+let hayCambios=false;
+/* Precios y nombres de ingredientes: se guardan con el botón GUARDAR (no se guardan recetas ni fotos). */
+const KEY_PRECIOS='ehsr-escandallos-precios-v1';
+const PIN='1978';
+let desbloqueado=false, ingDirty=false, dbh=null;
+function marcarIng(){ ingDirty=true; const b=document.getElementById('btn-guardar'); if(b) b.classList.add('dirty'); }
+function aplicarGuardados(list){
+  if(!Array.isArray(list)||!list.length) return false;
+  const usados=new Set(S.recetas.flatMap(r=>r.lineas.map(l=>l.ref)));
+  const vistos=new Set();
+  for(const src of list){
+    if(!src||!src.nombre) continue;
+    let dst=S.ingredientes.find(x=>x.id===src.id)||S.ingredientes.find(x=>norm(x.nombre)===norm(src.nombre));
+    if(dst){ const id=dst.id; Object.assign(dst,src,{id}); } else { dst={...src,id:src.id||uid()}; S.ingredientes.push(dst); }
+    vistos.add(dst.id);
+  }
+  S.ingredientes=S.ingredientes.filter(i=>vistos.has(i.id)||usados.has('i:'+i.id));
+  return true;
+}
+try{ const raw=localStorage.getItem(KEY_PRECIOS); if(raw){ const d=JSON.parse(raw); aplicarGuardados(d.ingredientes); } }catch(e){}
+(async()=>{ try{ if(window.claude&&window.claude.use){ dbh=await window.claude.use('db'); if(dbh){ const snap=await dbh.doc('config/precios').get(); if(snap.exists&&!ingDirty){ const d=snap.data(); if(aplicarGuardados(d.ingredientes)){ render(); if(ui.tab==='ficha') recalcFicha(); } } } } }catch(e){} })();
+async function guardarPrecios(){
+  const data={ingredientes:JSON.parse(JSON.stringify(S.ingredientes)),guardado:new Date().toISOString()};
+  let local=false, compartido=false;
+  try{ localStorage.setItem(KEY_PRECIOS,JSON.stringify(data)); local=true; }catch(e){}
+  if(dbh){ try{ await dbh.doc('config/precios').set(data); compartido=true; }catch(e){} }
+  if(compartido||local){ ingDirty=false; document.getElementById('btn-guardar').classList.remove('dirty'); }
+  toast(compartido? 'Guardado: precios y nombres actualizados para todos' : local? 'Guardado en este dispositivo' : 'No se ha podido guardar en este navegador');
+}
+function pedirPin(onOk,titulo){
+  const bg=document.createElement('div'); bg.className='modal-bg';
+  bg.innerHTML=`<form class="modal" id="pin-form"><h3>${esc(titulo||'Acceso de profesora')}</h3><div class="sub">Introduce el código de acceso.</div>
+    <input type="password" inputmode="numeric" autocomplete="off" id="pin-in" class="pin-in" maxlength="8" aria-label="Código de acceso">
+    <div class="pin-err" id="pin-err" role="alert"></div>
+    <div class="bar"><button type="button" class="btn ghost" id="pin-cancel">Cancelar</button><span class="grow"></span><button class="btn primary" type="submit">Entrar</button></div></form>`;
+  document.body.appendChild(bg);
+  const inp=bg.querySelector('#pin-in'); inp.focus();
+  const close=()=>bg.remove();
+  bg.querySelector('#pin-cancel').onclick=close;
+  bg.addEventListener('click',e=>{ if(e.target===bg) close(); });
+  bg.querySelector('#pin-form').addEventListener('submit',e=>{ e.preventDefault();
+    if(inp.value===PIN){ desbloqueado=true; close(); onOk&&onOk(); }
+    else { bg.querySelector('#pin-err').textContent='Código incorrecto'; inp.value=''; inp.focus(); } });
+}
+function save(){ hayCambios=true; }
+window.addEventListener('beforeunload',e=>{ if(hayCambios){ e.preventDefault(); e.returnValue=''; } });
+const fotoSrc = f=> f? String(f) : '';
+async function putFoto(dataUrl){ return dataUrl; }
+function delFoto(){}
+const ui={iprov:'',tab:'recetario',cat:'Todas',q:'',iq:'',ifam:'Todas',ficha:null,escala:''};
+
+/* ---------- Cálculo ---------- */
+const ingById = id=>S.ingredientes.find(i=>i.id===id);
+const recById = id=>S.recetas.find(r=>r.id===id);
+function unidadBase(medida){ return medida==='L'?'L':medida==='ud'?'ud':'kg'; }
+function costeIng(ing){
+  const base=num(ing.precio); if(base==null) return null;
+  const ivaP=num(ing.iva); const precio = base*(1+(ivaP||0)/100);
+  const unidades=num(ing.unidades)||1;
+  let porUnidad=precio/unidades, bruto=porUnidad;
+  if(ing.medida!=='ud'){
+    const c=num(ing.contenido);
+    if(c){ const base = (ing.contenidoUd==='g'||ing.contenidoUd==='ml')? c/1000 : c; bruto=porUnidad/base; }
+  }
+  const m=num(ing.merma)||0;
+  const neto = m>0&&m<100 ? bruto/(1-m/100) : bruto;
+  return {bruto,neto,base:unidadBase(ing.medida),conIva:precio,sinIva:ivaP==null};
+}
+function costeReceta(r, visit=new Set()){
+  if(visit.has(r.id)) return {total:null,ciclo:true,falta:[],lines:[]};
+  visit.add(r.id);
+  let total=0, falta=[], lines=[];
+  for(const l of r.lineas){
+    const info=lineInfo(l,visit);
+    lines.push(info);
+    if(!info.src){ if(String(l.ref||'').trim()) falta.push(info.nombre||'?'); continue; }
+    if(info.coste==null){ if(num(l.cant)!=null) falta.push(info.nombre); continue; }
+    total+=info.coste;
+  }
+  visit.delete(r.id);
+  const n=num(r.porciones);
+  const valid = r.lineas.some(l=>l.ref);
+  return {total: valid?total:null, racion: valid&&n?total/n:null, falta, lines};
+}
+function pesoReceta(r){ let g=0; for(const l of r.lineas){ const c=num(l.cant); if(c==null) continue; if(l.ud==='g'||l.ud==='ml') g+=c; else if(l.ud==='kg'||l.ud==='L') g+=c*1000; } return g; }
+function lineInfo(l,visit=new Set()){
+  const ref=l.ref||''; let src=null,nombre='',unit=null,medida='kg';
+  if(ref.startsWith('i:')){ src=ingById(ref.slice(2)); if(src){nombre=src.nombre;medida=src.medida;const c=costeIng(src); unit=c?c.neto:null;} }
+  else if(ref.startsWith('r:')){ src=recById(ref.slice(2)); if(src){nombre=src.nombre;medida='kg';const rend=pesoReceta(src); const cr=costeReceta(src,visit); unit=(rend&&cr.total!=null&&!cr.falta.length)?cr.total/(rend/1000):null;} }
+  else if(ref.startsWith('?:')){ nombre=ref.slice(2); }
+  const cant=num(l.cant); let qBase=null;
+  if(cant!=null){ qBase = (l.ud==='g'||l.ud==='ml')? cant/1000 : cant; }
+  const coste = unit!=null&&qBase!=null ? unit*qBase : null;
+  return {src,nombre,unit,medida,base:unidadBase(medida),coste};
+}
+function unitsFor(medida){ return medida==='L'?['ml','L']:medida==='ud'?['ud']:['g','kg']; }
+function resumen(r){
+  const c=costeReceta(r); const iva=(num(r.iva)??num(S.settings.iva)??10)/100;
+  const pvp=num(r.pvp); const neto=pvp!=null?pvp/(1+iva):null;
+  const fc = c.racion!=null&&neto? c.racion/neto : null;
+  const margen = c.racion!=null&&neto!=null? neto-c.racion : null;
+  const n=num(r.porciones);
+  const obj=(num(S.settings.objetivo)||30)/100;
+  const sugNeto = c.racion!=null? c.racion/obj : null;
+  return {...c,iva,pvp,neto,fc,margen,margenTotal: margen!=null&&n?margen*n:null, sugNeto, sugPvp: sugNeto!=null?sugNeto*(1+iva):null, obj};
+}
+function fcClass(fc,obj){ if(fc==null) return 'neutral'; if(fc<=obj) return 'ok'; if(fc<=obj+0.08) return 'warn'; return 'bad'; }
+function usos(ingId){ return S.recetas.filter(r=>r.lineas.some(l=>l.ref==='i:'+ingId)).length; }
+
+/* ---------- Navegación ---------- */
+function setTab(t){
+  ui.tab=t;
+  $('#t-ficha').hidden = !ui.ficha;
+  $$('.tab').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===t)));
+  render(); window.scrollTo({top:0});
+}
+$('.tabs-in').addEventListener('click',e=>{ const b=e.target.closest('.tab'); if(!b) return; if(b.dataset.tab==='ajustes'&&!desbloqueado){ setTab('ajustes'); pedirPin(()=>render()); return; } setTab(b.dataset.tab); });
+function counts(){
+  $('#c-rec').textContent=S.recetas.length;
+  const sin=S.ingredientes.filter(i=>num(i.precio)==null).length;
+  $('#c-ing').textContent= sin? sin+' sin precio' : S.ingredientes.length;
+}
+function render(){
+  counts();
+  const m=$('#main');
+  const notice = '<div class="notice" style="font-weight:500"><b>Las recetas y fotos no se guardan en la app.</b> Cuando termines, pulsa «Descargar PDF» en cada receta. Al cerrar o recargar la página se borran.</div>';
+  if(ui.tab==='recetario') m.innerHTML=notice+vRecetario();
+  else if(ui.tab==='ficha'&&ui.ficha&&recById(ui.ficha)) { m.innerHTML=notice+vFicha(recById(ui.ficha)); }
+  else if(ui.tab==='ingredientes') m.innerHTML=notice+vIngredientes();
+  else if(ui.tab==='ajustes') m.innerHTML= desbloqueado? vAjustes() : `<section class="lock panel"><h3>Ajustes · acceso de profesora</h3><div class="sub" style="margin-bottom:12px">Esta sección necesita código de acceso.</div><button class="btn primary" data-act="desbloquear">Introducir código</button></section>`;
+  else { ui.tab='recetario'; m.innerHTML=notice+vRecetario(); }
+}
+let toastT;
+function toast(msg){ let t=$('.toast'); if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t);} t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2600); }
+
+/* ---------- Vista: Recetario ---------- */
+function vRecetario(){
+  const cats=S.settings.categorias;
+  const q=norm(ui.q);
+  let list=S.recetas.filter(r=>(ui.cat==='Todas'||r.categoria===ui.cat)&&(!q||norm(r.nombre+' '+r.alumno).includes(q)));
+  const groups=[...cats, ...new Set(S.recetas.map(r=>r.categoria).filter(c=>c&&!cats.includes(c)))];
+  let html=`<section class="view">
+  <div class="bar"><div class="grow"><h2 class="h-sec">Recetario</h2><div class="sub">Abre una receta para ver su ficha técnica y su escandallo, o crea una nueva.</div></div>
+  <button class="btn primary" data-act="nueva">+ Nueva receta</button></div>
+  <div class="bar"><input type="search" id="q-rec" class="grow" placeholder="Buscar por receta o alumno/a" value="${esc(ui.q)}" style="max-width:340px"></div>
+  <div class="cats" role="group" aria-label="Filtrar por categoría">${['Todas',...groups].map(c=>`<button class="chip" data-cat="${esc(c)}" aria-pressed="${c===ui.cat}">${esc(c)}</button>`).join('')}</div>`;
+  if(!list.length){
+    html+=`<div class="empty">${S.recetas.length?'Ninguna receta coincide con el filtro.':'Todavía no hay recetas.'}<br><br><button class="btn primary" data-act="nueva">+ Crear la primera receta</button></div>`;
+  }
+  for(const g of [...groups,'']){
+    const items=list.filter(r=>(r.categoria||'')===g || (g===''&&!r.categoria));
+    if(!items.length) continue;
+    html+=`<div class="group"><h2>${esc(g||'Sin categoría')}</h2><div class="cards">${items.map(card).join('')}</div></div>`;
+  }
+  return html+'</section>';
+}
+function card(r){
+  const s=resumen(r);
+  const est = !r.lineas.length ? '<span class="pill neutral">Sin ingredientes</span>' : s.falta.length ? `<span class="pill warn">Faltan ${s.falta.length} precio${s.falta.length>1?'s':''}</span>` : '<span class="pill ok">Escandallo completo</span>';
+  const fcp = s.fc!=null? `<span class="pill ${fcClass(s.fc,s.obj)}">${pct(s.fc)}</span>`:'<b>—</b>';
+  const rend=0;
+  return `<button class="card" data-open="${r.id}">
+    ${(r.fotos||[]).length&&fotoSrc(r.fotos[0])?`<img class="thumb" src="${fotoSrc(r.fotos[0])}" alt="">`:''}
+    <div><div class="t">${esc(r.nombre||'Receta sin nombre')}</div><div class="who">${esc(r.alumno||'Sin autor')}${r.fecha?' · '+esc(new Date(r.fecha).toLocaleDateString('es-ES')):''}</div></div>
+    <div>${est}${rend?' <span class="pill neutral">Elaboración base · '+fmt(rend,0)+' g</span>':''}</div>
+    <div class="figs num"><div class="fig"><small>Coste ración</small><b>${s.falta.length?'—':eur(s.racion)}</b></div><div class="fig"><small>PVP</small><b>${eur(s.pvp)}</b></div><div class="fig"><small>% coste</small>${s.falta.length?'<b>—</b>':fcp}</div></div>
+  </button>`;
+}
+
+/* ---------- Vista: Ficha ---------- */
+function refOptions(currentId){
+  const opts=S.ingredientes.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).map(i=>`<option value="${esc(i.nombre)}"></option>`);
+  S.recetas.filter(r=>r.id!==currentId&&pesoReceta(r)>0).forEach(r=>opts.push(`<option value="${esc('Elaboración: '+r.nombre)}"></option>`));
+  return opts.join('');
+}
+function refName(l){
+  const ref=l.ref||'';
+  if(ref.startsWith('i:')){ const i=ingById(ref.slice(2)); return i?i.nombre:''; }
+  if(ref.startsWith('r:')){ const r=recById(ref.slice(2)); return r?'Elaboración: '+r.nombre:''; }
+  if(ref.startsWith('?:')) return ref.slice(2);
+  return '';
+}
+function vFicha(r){
+  const cats=S.settings.categorias.includes(r.categoria)||!r.categoria?S.settings.categorias:[...S.settings.categorias,r.categoria];
+  return `<section class="view" id="ficha" data-id="${r.id}">
+  <div class="bar"><button class="btn ghost" data-act="volver">← Recetario</button><div class="grow"></div>
+    <button class="btn" data-act="duplicar">Duplicar</button>
+    <button class="btn primary" data-act="pdf">Descargar PDF</button>
+    <span id="del-slot"><button class="btn danger" data-act="borrar-pedir">Eliminar</button></span></div>
+  <div class="ficha-head">
+    <input type="text" class="title-in" id="f-nombre" data-f="nombre" value="${esc(r.nombre)}" placeholder="Nombre de la receta" aria-label="Nombre de la receta">
+  </div>
+  <div class="ficha-grid">
+    <div style="display:grid;gap:18px;min-width:0">
+      <div class="panel"><h3>Datos de la ficha</h3>
+        <div class="fields">
+          <label class="f"><span>Categoría</span><select id="f-cat" data-f="categoria"><option value="">— Elegir —</option>${cats.map(c=>`<option ${c===r.categoria?'selected':''}>${esc(c)}</option>`).join('')}</select></label>
+          <label class="f"><span>Alumno/a</span><input type="text" id="f-alumno" data-f="alumno" value="${esc(r.alumno)}"></label>
+          <label class="f"><span>Fecha</span><input type="date" id="f-fecha" data-f="fecha" value="${esc(r.fecha)}"></label>
+          <label class="f"><span>Nº de porciones</span><input type="number" min="0" step="1" id="f-porciones" data-f="porciones" value="${esc(r.porciones)}" class="num"></label>
+          <label class="f"><span>Tamaño de la porción</span><input type="text" id="f-porcion" data-f="porcionTam" value="${esc(r.porcionTam)}" placeholder="p. ej. 120 g"></label>
+          <label class="f"><span>Temperatura de servicio</span><input type="text" id="f-tserv" data-f="tempServ" value="${esc(r.tempServ)}"></label>
+        </div>
+      </div>
+      <div style="display:grid;gap:10px">
+        <div class="bar"><h3 class="grow" style="font-size:19px">Escandallo</h3>
+          <label class="f" style="grid-template-columns:auto 90px;align-items:center;gap:8px"><span>Calcular para</span><input type="number" min="0" id="f-escala" value="${esc(ui.escala)}" placeholder="raciones" class="num"></label></div>
+        <div class="tbl-wrap"><table class="lines"><thead><tr><th>Ingrediente</th><th class="r">Cantidad</th><th>Unidad</th><th class="r" id="th-esc" ${num(ui.escala)?'':'hidden'}>Escalado</th><th class="r">Coste unit. (IVA incl.)</th><th class="r">Coste</th><th>% del total</th><th></th></tr></thead>
+        <tbody id="lines">${r.lineas.map((l,i)=>lineRow(r,l,i)).join('')}</tbody></table></div>
+        <datalist id="dl-ings">${refOptions(r.id)}</datalist>
+        <div class="bar"><button class="btn" data-act="add-linea">+ Añadir ingrediente</button><span class="sub">Escribe y elige de la lista. Los costes de los ingredientes llevan el IVA de compra incluido.</span></div>
+      </div>
+      <div class="panel"><h3>Elaboración, presentación y equipo</h3>
+        <div class="texts">
+          <label class="f"><span>Elaboración</span><textarea id="f-elab" data-f="elaboracion" rows="7" placeholder="Pasos: mezclar, montar, hornear, enfriar…">${esc(r.elaboracion)}</textarea></label>
+          <label class="f"><span>Presentación / emplatado</span><textarea id="f-pres" data-f="presentacion" rows="7">${esc(r.presentacion)}</textarea></label>
+          <label class="f"><span>Equipo necesario (mise en place)</span><textarea id="f-equipo" data-f="equipo" rows="7">${esc(r.equipo)}</textarea></label>
+        </div>
+      </div>
+      <div class="panel"><h3>Alérgenos</h3>
+        <div class="alg">${ALERGENOS.map((a,i)=>`<label><input type="checkbox" id="alg-${i}" data-alg="${esc(a)}" ${r.alergenos.includes(a)?'checked':''}>${esc(a)}</label>`).join('')}</div>
+      </div>
+      <div class="panel"><h3>Fotos del resultado final <span class="sub" style="font-family:var(--f-body);font-weight:500;font-size:13px">· hasta ${MAX_FOTOS}, salen en el PDF</span></h3>
+        <div class="gallery">${(r.fotos||[]).map((f,k)=>`<figure><img src="${fotoSrc(f)}" alt="Foto ${k+1} del resultado final"><button class="btn small" data-act="quitar-foto" data-k="${k}" aria-label="Quitar foto ${k+1}">✕</button></figure>`).join('')}
+        ${(r.fotos||[]).length<MAX_FOTOS?`<label class="add"><input type="file" id="f-foto" accept="image/*" multiple hidden><span>+ Añadir fotos<br><small style="font-weight:500">desde el móvil o el ordenador</small></span></label>`:''}</div>
+      </div>
+    </div>
+    <aside class="results" id="results">${resultsPanel(r)}</aside>
+  </div></section>`;
+}
+function lineRow(r,l,i){
+  const info=lineInfo(l); const units=info.src?unitsFor(info.medida):['g','kg','ml','L','ud'];
+  const ud=units.includes(l.ud)?l.ud:units[0];
+  const unknown = !info.src && refName(l);
+  return `<tr data-i="${i}">
+    <td><input type="text" list="dl-ings" id="ln-n-${i}" data-ln="nombre" value="${esc(refName(l))}" placeholder="Buscar ingrediente" aria-label="Ingrediente">
+      ${info.src&&info.src.proveedor?`<div class="unit">Proveedor: ${esc(info.src.proveedor)}</div>`:''}
+      ${unknown?`<div class="miss">No está en la lista. <button class="linkbtn" data-act="crear-ing" data-i="${i}">Crear «${esc(refName(l))}»</button></div>`:''}</td>
+    <td class="r"><input type="number" min="0" step="any" id="ln-c-${i}" data-ln="cant" value="${esc(l.cant)}" class="num" style="width:96px;text-align:right" aria-label="Cantidad"></td>
+    <td><select id="ln-u-${i}" data-ln="ud" aria-label="Unidad">${units.map(u=>`<option ${u===ud?'selected':''}>${u}</option>`).join('')}</select></td>
+    <td class="r num" data-o="esc" ${num(ui.escala)?'':'hidden'}></td>
+    <td class="r num" data-o="unit"></td>
+    <td class="r num" data-o="coste"></td>
+    <td data-o="share"></td>
+    <td><button class="btn ghost small" data-act="del-linea" data-i="${i}" aria-label="Quitar ingrediente">✕</button></td>
+  </tr>`;
+}
+function resultsPanel(r){
+  return `<div class="panel" style="display:grid;gap:14px">
+    <h3 style="margin:0">Resultado del escandallo</h3>
+    <div id="res-alert"></div>
+    <div class="big num"><div class="k"><small>Coste total</small><b id="o-total">—</b></div><div class="k"><small>Coste por ración</small><b id="o-racion">—</b></div></div>
+    <div class="inline2">
+      <label class="f"><span>PVP por ración (IVA incl.)</span><input type="number" min="0" step="0.05" id="f-pvp" data-f="pvp" value="${esc(r.pvp)}" class="num"></label>
+      <label class="f"><span>IVA %</span><input type="number" min="0" step="1" id="f-iva" data-f="iva" value="${esc(r.iva??S.settings.iva)}" class="num"></label>
+    </div>
+    <div class="rows num">
+      <div><span>Precio de venta neto (sin IVA)</span><b id="o-neto">—</b></div>
+      <div><span>% de coste (food cost)</span><b id="o-fc">—</b></div>
+      <div><span>Margen bruto por ración</span><b id="o-margen">—</b></div>
+      <div><span>Margen bruto de la receta</span><b id="o-margent">—</b></div>
+    </div>
+    <div><div class="gauge" aria-hidden="true"><i id="o-gauge" style="width:0"></i><span class="mark" id="o-mark"></span></div>
+      <div class="sub" style="font-size:12px;margin-top:4px" id="o-gtxt"></div></div>
+    <div class="tip" id="o-sug"></div>
+  </div>`;
+}
+function recalcFicha(){
+  const box=$('#ficha'); if(!box) return; const r=recById(box.dataset.id); const s=resumen(r);
+  const factor = num(ui.escala)&&num(r.porciones)? num(ui.escala)/num(r.porciones) : null;
+  $$('#lines tr').forEach(tr=>{
+    const i=+tr.dataset.i, l=r.lineas[i], info=s.lines[i]||lineInfo(l);
+    tr.querySelector('[data-o=unit]').innerHTML = info.unit!=null? eur(info.unit)+' <span class="unit">/'+info.base+'</span>' : (info.src?'<span class="miss">Sin precio</span>':'');
+    tr.querySelector('[data-o=coste]').textContent = info.coste!=null? eur(info.coste,3):'—';
+    const sh = info.coste!=null&&s.total? info.coste/s.total : null;
+    tr.querySelector('[data-o=share]').innerHTML = sh!=null? `<div class="share"><span class="b" style="width:${Math.max(2,sh*70)}px"></span><span class="num">${pct(sh)}</span></div>`:'';
+    const e=tr.querySelector('[data-o=esc]'); e.hidden=!num(ui.escala);
+    e.textContent = factor&&num(l.cant)!=null? fmt(num(l.cant)*factor,1)+' '+(l.ud||''):'';
+  });
+  $('#th-esc').hidden=!num(ui.escala);
+  const inc=s.falta.length>0;
+  $('#res-alert').innerHTML = !r.lineas.length? '<span class="pill neutral">Añade ingredientes para calcular</span>'
+    : inc? `<div class="notice" style="font-weight:500">Faltan precios de: <b>${s.falta.map(esc).join(', ')}</b>. Los totales no son definitivos. <button class="linkbtn" data-act="ir-ing">Ir a Ingredientes y precios</button></div>`
+    : (num(r.escala)?'':'' ) + (num(r.porciones)?'<span class="pill ok">Escandallo completo</span>':'<span class="pill warn">Indica el nº de porciones</span>');
+  $('#o-total').textContent = s.total!=null? eur(s.total):'—';
+  $('#o-racion').textContent = s.racion!=null? eur(s.racion):'—';
+  $('#o-neto').textContent = eur(s.neto);
+  const fcOK = !inc && s.fc!=null;
+  $('#o-fc').innerHTML = fcOK? `<span class="pill ${fcClass(s.fc,s.obj)}">${pct(s.fc)}</span>`:'—';
+  $('#o-margen').textContent = !inc? eur(s.margen):'—';
+  $('#o-margent').textContent = !inc? eur(s.margenTotal):'—';
+  const g=$('#o-gauge'); const w=fcOK? Math.min(100,s.fc*100/0.6*1):0;
+  g.style.width = (fcOK? Math.min(100,s.fc/0.6*100):0)+'%';
+  g.style.background = fcOK? `var(--${fcClass(s.fc,s.obj)})`:'var(--sunk)';
+  $('#o-mark').style.left = Math.min(100,s.obj/0.6*100)+'%';
+  $('#o-gtxt').textContent = `Escala 0–60 %. La marca indica el objetivo del ${fmt(s.obj*100,0)} % (se cambia en Ajustes).`;
+  $('#o-sug').innerHTML = (!inc && s.racion!=null)
+    ? `<b>Precio orientativo</b> para un ${fmt(s.obj*100,0)} % de coste: <b class="num">${eur(s.sugPvp)}</b> con IVA (${eur(s.sugNeto)} sin IVA). Es una referencia de cálculo; el precio final lo decide el equipo.`
+    : `<b>Cómo se calcula:</b> coste de cada ingrediente = cantidad × coste unitario con IVA (€/kg, €/L o €/ud). Coste por ración = coste total ÷ nº de porciones. % de coste = coste por ración ÷ precio neto.`;
+}
+
+/* ---------- Vista: Ingredientes ---------- */
+function vIngredientes(){
+  const q=norm(ui.iq);
+  const list=S.ingredientes.filter(i=>(ui.ifam==='Todas'||i.familia===ui.ifam)&&(!ui.iprov||i.proveedor===ui.iprov)&&(!q||norm(i.nombre).includes(q))).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+  const sin=S.ingredientes.filter(i=>num(i.precio)==null).length;
+  const sinIva=S.ingredientes.filter(i=>num(i.precio)!=null&&num(i.iva)==null).length;
+  return `<section class="view">
+  <div class="bar"><div class="grow"><h2 class="h-sec">Ingredientes y precios</h2><div class="sub">Lista común para todas las recetas. Si cambias un precio aquí, se actualizan todos los escandallos.</div></div>
+    <button class="btn primary" data-act="add-ing">+ Añadir ingrediente</button></div>
+  <div class="tip"><b>Cómo se rellena:</b> copia del albarán el <b>precio sin IVA</b> y el <b>tipo de IVA</b>; la app calcula el precio con IVA y el coste por kg, litro o unidad que usan los escandallos (todos los costes de las recetas llevan el IVA incluido). Ejemplo real: harina Brisa a 1,15 €/kg + 4 % de IVA = 1,20 €/kg; azúcar en saco de 25 kg a 20,69 € + 10 % = 22,76 € → 0,91 €/kg. ${PRECIOS_CENTRO.items.length?`Precios cargados: <b>albaranes del curso ${esc(PRECIOS_CENTRO.curso)}</b>.`:''}</div>
+  <div class="bar"><input type="search" id="q-ing" placeholder="Buscar ingrediente" value="${esc(ui.iq)}" style="max-width:280px">
+    <select id="f-fam" style="max-width:240px" aria-label="Familia"><option>Todas</option>${FAMILIAS.map(f=>`<option ${f===ui.ifam?'selected':''}>${esc(f)}</option>`).join('')}</select>
+    <select id="f-prov" style="max-width:240px" aria-label="Proveedor"><option value="">Todos los proveedores</option>${[...new Set(S.ingredientes.map(i=>i.proveedor).filter(Boolean))].sort().map(p=>`<option ${p===ui.iprov?'selected':''}>${esc(p)}</option>`).join('')}</select>
+    <span class="grow"></span>${sinIva?`<span class="pill warn">${sinIva} sin tipo de IVA</span>`:''}${sin?`<span class="pill warn">${sin} sin precio</span>`:'<span class="pill ok">Todos con precio</span>'}</div>
+  <div class="tbl-wrap"><table class="ing-tbl"><thead><tr>
+    <th>Ingrediente</th><th>Se usa en</th><th>Familia</th><th>Proveedor</th><th>Nº albarán</th><th>Fecha albarán</th><th class="r">Precio sin IVA €</th><th>IVA</th><th class="r">Precio con IVA</th><th class="r">Nº unidades</th><th>Contenido de cada unidad</th><th>Formato</th><th class="r">Merma %</th><th class="r">Coste (IVA incl.)</th><th class="r">Recetas</th><th></th></tr></thead>
+    <tbody id="ing-body">${list.map(ingRow).join('')||'<tr><td colspan="16" class="sub" style="padding:16px">No hay ingredientes con ese filtro.</td></tr>'}</tbody></table></div>
+  <datalist id="dl-prov">${[...new Set(S.ingredientes.map(i=>i.proveedor).filter(Boolean))].map(p=>`<option value="${esc(p)}"></option>`).join('')}</datalist>
+  <div class="sub">«Se usa en» indica cómo se mide en las recetas: por peso (kg/g), por volumen (L/ml) o por unidades. Si dejas vacío el contenido, el precio se toma por kg o por litro directamente.</div>
+  </section>`;
+}
+function conIvaCell(i,c){ if(!c) return '—'; return num(i.iva)==null? `<span class="miss">Falta IVA</span>` : eur(c.conIva); }
+function ingRow(i){
+  const c=costeIng(i); const u=usos(i.id);
+  const cUds = i.medida==='L'?['ml','L']:['g','kg'];
+  return `<tr data-ing="${i.id}">
+    <td><input type="text" id="in-n-${i.id}" data-k="nombre" value="${esc(i.nombre)}" aria-label="Nombre"></td>
+    <td><select id="in-m-${i.id}" data-k="medida" aria-label="Medida en receta"><option value="kg" ${i.medida==='kg'?'selected':''}>Peso</option><option value="L" ${i.medida==='L'?'selected':''}>Volumen</option><option value="ud" ${i.medida==='ud'?'selected':''}>Unidades</option></select></td>
+    <td><select id="in-f-${i.id}" data-k="familia" aria-label="Familia">${FAMILIAS.map(f=>`<option ${f===i.familia?'selected':''}>${esc(f)}</option>`).join('')}</select></td>
+    <td><input type="text" id="in-pv-${i.id}" data-k="proveedor" value="${esc(i.proveedor)}" list="dl-prov" style="min-width:140px" aria-label="Proveedor"></td>
+    <td><input type="text" id="in-al-${i.id}" data-k="albaran" value="${esc(i.albaran)}" style="min-width:100px;width:110px" aria-label="Número de albarán"></td>
+    <td><input type="date" id="in-d-${i.id}" data-k="fecha" value="${esc(i.fecha)}" aria-label="Fecha del albarán"></td>
+    <td class="r"><input type="number" min="0" step="0.01" id="in-p-${i.id}" data-k="precio" value="${esc(i.precio)}" class="num" style="text-align:right" placeholder="Pendiente" aria-label="Precio sin IVA"></td>
+    <td><select id="in-iva-${i.id}" data-k="iva" aria-label="Tipo de IVA">${['','0','4','5','10','21'].map(v=>`<option value="${v}" ${String(i.iva??'')===v?'selected':''}>${v===''?'—':v+' %'}</option>`).join('')}</select></td>
+    <td class="r num" data-o="coniva">${conIvaCell(i,c)}</td>
+    <td class="r"><input type="number" min="0" step="1" id="in-u-${i.id}" data-k="unidades" value="${esc(i.unidades)}" class="num" style="text-align:right" placeholder="1" aria-label="Número de unidades"></td>
+    <td>${i.medida==='ud'?'<span class="unit">1 ud</span>':`<span style="display:inline-flex;gap:4px"><input type="number" min="0" step="any" id="in-c-${i.id}" data-k="contenido" value="${esc(i.contenido)}" class="num" style="text-align:right" placeholder="—" aria-label="Contenido"><select id="in-cu-${i.id}" data-k="contenidoUd" aria-label="Unidad del contenido">${cUds.map(x=>`<option ${x===i.contenidoUd?'selected':''}>${x}</option>`).join('')}</select></span>`}</td>
+    <td><input type="text" id="in-fo-${i.id}" data-k="formato" value="${esc(i.formato)}" placeholder="Saco, bote…" style="min-width:110px" aria-label="Formato de compra"></td>
+    <td class="r"><input type="number" min="0" max="99" step="0.5" id="in-me-${i.id}" data-k="merma" value="${esc(i.merma)}" class="num" style="text-align:right;width:76px" placeholder="0" aria-label="Merma %"></td>
+    <td class="r num cost-cell" data-o="neto">${c?'<b>'+eur(c.neto)+'</b> <span class="unit">/'+c.base+'</span>':'<span class="miss">Sin precio</span>'}</td>
+    <td class="r num">${u}</td>
+    <td data-o="del">${u?'':`<button class="btn ghost small" data-act="del-ing" aria-label="Eliminar ingrediente">✕</button>`}</td>
+  </tr>`;
+}
+
+/* ---------- Vista: Ajustes ---------- */
+function vAjustes(){
+  const st=S.settings;
+  return `<section class="view">
+  <div><h2 class="h-sec">Ajustes</h2><div class="sub">Valores para esta sesión de trabajo.</div></div>
+  <div class="two">
+    <div class="panel" style="display:grid;gap:12px"><h3 style="margin:0">Valores por defecto</h3>
+      <div class="fields">
+        <label class="f"><span>Alumno/a</span><input type="text" id="s-alumno" data-s="alumno" value="${esc(st.alumno)}" placeholder="Se pone en las recetas nuevas"></label>
+        <label class="f"><span>Grupo / curso</span><input type="text" id="s-curso" data-s="curso" value="${esc(st.curso)}" placeholder="p. ej. 2º CFGM Cocina"></label>
+        <label class="f"><span>IVA hostelería %</span><input type="number" id="s-iva" data-s="iva" value="${esc(st.iva)}" class="num"></label>
+        <label class="f"><span>Objetivo % de coste</span><input type="number" id="s-obj" data-s="objetivo" value="${esc(st.objetivo)}" class="num"></label>
+      </div>
+      <div class="sub">Comprobad el tipo de IVA vigente antes de fijar precios. El objetivo de % de coste es una referencia de clase.</div>
+      <label class="f"><span>Categorías del recetario (una por línea)</span><textarea id="s-cats" rows="8">${esc(st.categorias.join('\n'))}</textarea></label>
+    </div>
+    <div class="panel" style="display:grid;gap:10px"><h3 style="margin:0">Cómo funciona</h3>
+      <div class="sub">La app no guarda recetas ni fotos: así es más rápida y no ocupa espacio. Solo se guardan los precios y nombres de ingredientes.</div>
+      <ol class="sub" style="margin:0;padding-left:18px;display:grid;gap:6px">
+        <li>Crea la receta y añade los ingredientes. Los precios de los proveedores ya están cargados.</li>
+        <li>Añade las fotos del resultado final.</li>
+        <li>Pulsa <b>«Descargar PDF»</b> y guarda o entrega el archivo.</li>
+        <li>Al cerrar o recargar la página, las recetas se borran. Los precios y nombres de ingredientes se conservan si se pulsa <b>GUARDAR</b> (con código).</li>
+      </ol>
+    </div>
+  </div></section>`;
+}
+
+/* ---------- Descargas, impresión ---------- */
+let dl=null;
+(async()=>{ try{ if(window.claude&&window.claude.use){ dl=await window.claude.use('downloads'); } }catch(e){ dl=null; } })();
+async function saveFile(filename,data,mime){
+  if(dl){ try{ await dl.save({filename,data}); toast('Archivo guardado'); return; }catch(e){ if(e&&e.code==='declined'){ toast('Descarga cancelada'); return; } } }
+  try{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([data],{type:mime})); a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500); toast('Archivo descargado'); }
+  catch(e){ toast('No se pudo descargar el archivo en esta vista'); }
+}
+const safeName = s=>String(s||'receta').replace(/[\\/:*?"<>|]+/g,'').trim().slice(0,80)||'receta';
+const WIN_EXTRA='€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ';
+function pdfSafe(t){ return String(t??'').replace(/≈/g,'~').replace(/[−‐]/g,'-').replace(/→/g,'->').replace(/[^\n\r\t\x20-\xFF]/g,ch=>WIN_EXTRA.includes(ch)?ch:''); }
+async function pdfReceta(r){
+  const J=window.jspdf&&window.jspdf.jsPDF;
+  if(!J||!J.API.autoTable){ toast('No se pudo cargar el generador de PDF. Comprueba la conexión a internet.'); return; }
+  toast('Generando PDF…');
+  const s=resumen(r), inc=s.falta.length>0, T=pdfSafe;
+  const doc=new J({unit:'mm',format:'a4'}); const W=210,H=297,M=14,CW=W-2*M;
+  const INK=[28,27,24], MUT=[107,103,93], GOLD=[184,138,46], GOLDINK=[126,92,20], SOFT=[243,231,200], LINE=[222,218,208];
+  // Cabecera
+  doc.setFillColor(...INK); doc.rect(0,0,W,36,'F');
+  try{ doc.addImage(LOGO,'JPEG',M,6,24,24); }catch(e){}
+  const X=M+30;
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(216,178,98);
+  doc.text(T('ESCUELA DE HOSTELERÍA SAN ROQUE  ·  FICHA TÉCNICA Y ESCANDALLO'),X,11);
+  doc.setFontSize(17); doc.setTextColor(255,255,255);
+  const tl=doc.splitTextToSize(T(r.nombre||'Receta sin nombre'),W-X-M); doc.text(tl.slice(0,2),X,18.5);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.3); doc.setTextColor(232,226,214);
+  doc.text(T(`Módulo: Postres en Restauración  ·  Profesora: Eva Díaz Campos  ·  Alumno/a: ${r.alumno||'—'}${S.settings.curso?'  ·  '+S.settings.curso:''}`),X,tl.length>1?31:27,{maxWidth:W-X-M});
+  let y=42;
+  // Datos
+  const fecha=r.fecha?new Date(r.fecha).toLocaleDateString('es-ES'):'';
+  const d=[['Categoría',r.categoria,'PVP por ración (IVA incl.)',s.pvp!=null?eur(s.pvp):''],
+    ['Fecha',fecha,`Precio neto (sin IVA ${fmt(s.iva*100,0)} %)`,s.neto!=null?eur(s.neto):''],
+    ['Nº de porciones',r.porciones,'Coste total de la receta',inc?'incompleto':eur(s.total)],
+    ['Tamaño de la porción',r.porcionTam,'Coste por ración',inc?'incompleto':eur(s.racion)],
+    ['Temperatura de servicio',r.tempServ,'% de coste',!inc&&s.fc!=null?pct(s.fc):''],
+    ['','','Margen bruto por ración',!inc&&s.margen!=null?eur(s.margen):'']
+  ].map(row=>row.map((v,k)=>T((v===''||v==null)?(row[k&~1]===''?'':'—'):v)));
+  doc.autoTable({startY:y,body:d,theme:'plain',margin:{left:M,right:M},styles:{fontSize:8.6,cellPadding:{top:1.1,bottom:1.1,left:1.5,right:1.5},textColor:INK,lineColor:LINE,lineWidth:{bottom:.15}},
+    columnStyles:{0:{textColor:MUT,cellWidth:38},1:{fontStyle:'bold',cellWidth:53},2:{textColor:MUT,cellWidth:45},3:{fontStyle:'bold',halign:'right'}}});
+  y=doc.lastAutoTable.finalY+5;
+  // Escandallo
+  const body=r.lineas.map((l,i)=>{ const info=s.lines[i]; const sh=info.coste!=null&&s.total?info.coste/s.total:null;
+    return [T(refName(l)||'—'), T(info.src&&info.src.proveedor?info.src.proveedor:''), T((num(l.cant)!=null?fmt(num(l.cant),3):'—')+' '+(l.ud||'')), T(info.unit!=null?eur(info.unit)+' /'+info.base:'sin precio'), T(info.coste!=null?eur(info.coste,3):'—'), T(sh!=null?pct(sh):'')]; });
+  doc.autoTable({startY:y,head:[['Ingrediente','Proveedor','Cantidad','Coste unit. (IVA incl.)','Coste','%']].map(rw=>rw.map(T)),body,
+    foot:[[T('Coste total de la receta'),'','','',T(s.total!=null?eur(s.total):'—'),''],[T('Coste por ración'),'','','',T(s.racion!=null?eur(s.racion):'—'),'']],
+    theme:'grid',margin:{left:M,right:M},showFoot:'lastPage',
+    styles:{fontSize:8.6,cellPadding:1.6,textColor:INK,lineColor:LINE,lineWidth:.15},
+    headStyles:{fillColor:SOFT,textColor:INK,fontStyle:'bold',fontSize:7.8},
+    footStyles:{fillColor:[255,255,255],textColor:INK,fontStyle:'bold'},
+    columnStyles:{0:{cellWidth:56},1:{cellWidth:38,textColor:MUT},2:{halign:'right'},3:{halign:'right'},4:{halign:'right'},5:{halign:'right'}}});
+  y=doc.lastAutoTable.finalY+4;
+  if(inc){ const msg=doc.splitTextToSize(T('Escandallo incompleto: faltan precios de '+s.falta.join(', ')+'.'),CW-6); const h=msg.length*4+4;
+    doc.setFillColor(251,235,207); doc.roundedRect(M,y,CW,h,1.5,1.5,'F'); doc.setTextColor(122,71,0); doc.setFontSize(8.6); doc.text(msg,M+3,y+5); y+=h+3; }
+  doc.setTextColor(...MUT); doc.setFontSize(7.4); doc.text(T('Costes de materias primas con el IVA de compra incluido.'),M,y+1); y+=9;
+  const need=h=>{ if(y+h>H-16){ doc.addPage(); y=M+4; } };
+  const section=(title,text)=>{
+    need(14); doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...GOLDINK); doc.text(T(title.toUpperCase()),M,y);
+    doc.setDrawColor(...LINE); doc.setLineWidth(.3); doc.line(M,y+1.6,W-M,y+1.6); y+=6.5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.2); doc.setTextColor(...INK);
+    const lines=doc.splitTextToSize(T(text&&String(text).trim()?text:'—'),CW);
+    for(const ln of lines){ need(5); doc.text(ln,M,y); y+=4.4; } y+=3;
+  };
+  section('Elaboración',r.elaboracion); section('Presentación',r.presentacion); section('Equipo necesario',r.equipo);
+  // Alérgenos
+  need(18); doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...GOLDINK); doc.text(T('ALÉRGENOS'),M,y); doc.line(M,y+1.6,W-M,y+1.6); y+=6;
+  let ax=M; doc.setFontSize(8);
+  for(const a of ALERGENOS){ const on=r.alergenos.includes(a); const w=doc.getTextWidth(T(a))+6;
+    if(ax+w>W-M){ ax=M; y+=7; need(8); }
+    if(on){ doc.setFillColor(...INK); doc.roundedRect(ax,y-3.6,w,5.4,2.6,2.6,'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); }
+    else { doc.setDrawColor(200,196,186); doc.roundedRect(ax,y-3.6,w,5.4,2.6,2.6,'S'); doc.setTextColor(...MUT); doc.setFont('helvetica','normal'); }
+    doc.text(T(a),ax+3,y+.4); ax+=w+2; }
+  y+=9;
+  // Fotos
+  const fotos=(r.fotos||[]).map(fotoSrc).filter(Boolean);
+  if(fotos.length){
+    const cols0=fotos.length===1?1:2, bh0=cols0===1?CW*0.7*0.75:((CW-6)/2)*0.75; need(bh0+12); doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...GOLDINK); doc.text(T('FOTOS DEL RESULTADO FINAL'),M,y); doc.line(M,y+1.6,W-M,y+1.6); y+=5;
+    const cols=fotos.length===1?1:2, gap=6, bw=cols===1?CW*0.7:(CW-gap)/2, bh=cols===1?CW*0.7*0.75:bw*0.75;
+    for(let k=0;k<fotos.length;k++){
+      const col=k%cols; if(col===0){ need(bh+4); }
+      let p; try{ p=doc.getImageProperties(fotos[k]); }catch(e){ continue; }
+      const sc=Math.min(bw/p.width,bh/p.height), w=p.width*sc, h=p.height*sc;
+      const bx=M+col*(bw+gap)+(bw-w)/2;
+      try{ doc.addImage(fotos[k],'JPEG',bx,y+(bh-h)/2,w,h); }catch(e){}
+      if(col===cols-1||k===fotos.length-1) y+=bh+gap;
+    }
+  }
+  // Pie
+  const n=doc.getNumberOfPages();
+  for(let i=1;i<=n;i++){ doc.setPage(i); doc.setFont('helvetica','normal'); doc.setFontSize(7.2); doc.setTextColor(...MUT);
+    doc.text(T('Escuela de Hostelería San Roque · Postres en Restauración · Generado el '+new Date().toLocaleDateString('es-ES')),M,H-8);
+    doc.text(T(`Página ${i} de ${n}`),W-M,H-8,{align:'right'}); }
+  const blob=doc.output('blob');
+  await saveFile('Ficha técnica - '+safeName(r.nombre)+'.pdf', blob, 'application/pdf');
+}
+/* ---------- Acciones ---------- */
+function nuevaReceta(){
+  const r={id:uid(),nombre:'',categoria:ui.cat!=='Todas'?ui.cat:'',alumno:S.settings.alumno||'',fecha:today(),porcionTam:'',porciones:'',rendimiento:'',tPrep:'',tCoc:'',tempServ:'',pvp:'',iva:S.settings.iva,lineas:[{ref:'',cant:'',ud:'g'}],elaboracion:'',presentacion:'',equipo:'',alergenos:[],fotos:[]};
+  S.recetas.push(r); save(); abrir(r.id); setTimeout(()=>$('#f-nombre')?.focus(),50);
+}
+function abrir(id){ ui.ficha=id; ui.escala=''; setTab('ficha'); recalcFicha(); }
+function resolveRef(text,currentId){
+  const t=norm(text); if(!t) return '';
+  if(t.startsWith('elaboracion:')){ const n=t.slice(12).trim(); const r=S.recetas.find(x=>x.id!==currentId&&norm(x.nombre)===n&&pesoReceta(x)>0); if(r) return 'r:'+r.id; }
+  const i=S.ingredientes.find(x=>norm(x.nombre)===t); if(i) return 'i:'+i.id;
+  return '?:'+String(text).trim();
+}
+function redrawLines(r){ $('#lines').innerHTML=r.lineas.map((l,i)=>lineRow(r,l,i)).join(''); recalcFicha(); }
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act],[data-open],[data-cat]'); if(!b) return;
+  if(b.dataset.open){ abrir(b.dataset.open); return; }
+  if(b.dataset.cat!=null&&!b.dataset.act){ ui.cat=b.dataset.cat; render(); return; }
+  const act=b.dataset.act; const fid=$('#ficha')?.dataset.id; const r=fid?recById(fid):null;
+  switch(act){
+    case 'nueva': nuevaReceta(); break;
+    case 'desbloquear': pedirPin(()=>render()); break;
+    case 'guardar': if(desbloqueado) guardarPrecios(); else pedirPin(()=>{ guardarPrecios(); if(ui.tab==='ajustes') render(); },'Guardar cambios de precios'); break;
+    case 'volver': ui.ficha=null; setTab('recetario'); break;
+    case 'add-linea': r.lineas.push({ref:'',cant:'',ud:'g'}); save(); redrawLines(r); $(`#ln-n-${r.lineas.length-1}`)?.focus(); break;
+    case 'del-linea': r.lineas.splice(+b.dataset.i,1); save(); redrawLines(r); break;
+    case 'crear-ing': { const i=+b.dataset.i; const l=r.lineas[i]; const nombre=refName(l); const medida= l.ud==='ud'?'ud':(l.ud==='ml'||l.ud==='L')?'L':'kg';
+      const ing={id:uid(),nombre,familia:'Otros',medida,formato:'',proveedor:'',albaran:'',fecha:'',precio:'',iva:'',unidades:'',contenido:'',contenidoUd:medida==='L'?'L':'kg',merma:''};
+      S.ingredientes.push(ing); l.ref='i:'+ing.id; save(); marcarIng(); $('#dl-ings').innerHTML=refOptions(r.id); redrawLines(r); counts(); toast(`«${nombre}» añadido. Pon su precio en Ingredientes y precios.`); break; }
+    case 'ir-ing': setTab('ingredientes'); break;
+    case 'duplicar': (async()=>{ const c=JSON.parse(JSON.stringify(r)); c.id=uid(); c.nombre=(r.nombre||'Receta')+' (copia)'; c.fecha=today(); c.fotos=[]; for(const f of (r.fotos||[])){ const d=fotoSrc(f); if(d) c.fotos.push(await putFoto(d)); } S.recetas.push(c); save(); abrir(c.id); toast('Receta duplicada'); })(); break;
+    case 'pdf': pdfReceta(r); break;
+    case 'borrar-pedir': $('#del-slot').innerHTML=`<span class="confirm">¿Eliminar la receta? <button class="btn small danger" data-act="borrar">Sí, eliminar</button><button class="btn small ghost" data-act="borrar-no">No</button></span>`; break;
+    case 'borrar-no': $('#del-slot').innerHTML='<button class="btn danger" data-act="borrar-pedir">Eliminar</button>'; break;
+    case 'borrar': (r.fotos||[]).forEach(delFoto); S.recetas=S.recetas.filter(x=>x.id!==r.id); S.recetas.forEach(x=>x.lineas.forEach(l=>{ if(l.ref==='r:'+r.id) l.ref='?:'+r.nombre; })); save(); ui.ficha=null; setTab('recetario'); toast('Receta eliminada'); break;
+    case 'quitar-foto': { const k=+b.dataset.k; const [f]=r.fotos.splice(k,1); delFoto(f); save(); render(); recalcFicha(); break; }
+    case 'add-ing': { const ing={id:uid(),nombre:'Nuevo ingrediente',familia:ui.ifam!=='Todas'?ui.ifam:'Otros',medida:'kg',formato:'',proveedor:'',albaran:'',fecha:'',precio:'',iva:'',unidades:'',contenido:'',contenidoUd:'kg',merma:''}; S.ingredientes.push(ing); save(); marcarIng(); ui.iq=''; render(); const el=$(`#in-n-${ing.id}`); el?.focus(); el?.select(); break; }
+    case 'del-ing': { const tr=b.closest('tr'); S.ingredientes=S.ingredientes.filter(x=>x.id!==tr.dataset.ing); save(); marcarIng(); tr.remove(); counts(); toast('Ingrediente eliminado'); break; }
+    case 'exportar': { const copy=JSON.parse(JSON.stringify(S)); copy.recetas.forEach(r=>{ r.fotos=(r.fotos||[]).map(fotoSrc).filter(Boolean); }); saveFile(`escandallos-postres-${today()}.json`, JSON.stringify({app:'ehsr-escandallos',v:2,...copy}),'application/json'); break; }
+    case 'exportar-ing': saveFile(`precios-ingredientes-${today()}.json`, JSON.stringify({app:'ehsr-escandallos',v:1,ingredientes:S.ingredientes},null,1),'application/json'); break;
+    case 'reset-pedir': $('#reset-slot').innerHTML=`<span class="confirm">Se borrarán todas las recetas. <button class="btn small danger" data-act="reset">Sí, borrar todo</button><button class="btn small ghost" data-act="reset-no">Cancelar</button></span>`; break;
+    case 'reset-no': $('#reset-slot').innerHTML='<button class="btn danger" data-act="reset-pedir">Borrar todo…</button>'; break;
+    case 'reset': { S.recetas.forEach(x=>(x.fotos||[]).forEach(delFoto)); const st=S.settings; S=seed(); S.recetas=[]; S.settings=st; save(); ui.ficha=null; setTab('recetario'); toast('Datos borrados'); break; }
+  }
+});
+
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='q-rec'){ ui.q=t.value; const pos=t.selectionStart; render(); const n=$('#q-rec'); n.focus(); n.setSelectionRange(pos,pos); return; }
+  if(t.id==='q-ing'){ ui.iq=t.value; const pos=t.selectionStart; render(); const n=$('#q-ing'); n.focus(); n.setSelectionRange(pos,pos); return; }
+  if(t.id==='f-escala'){ ui.escala=t.value; recalcFicha(); return; }
+  const fid=$('#ficha')?.dataset.id;
+  if(fid&&t.dataset.f){ const r=recById(fid); r[t.dataset.f]=t.value; save(); recalcFicha(); return; }
+  if(fid&&t.dataset.ln){ const r=recById(fid); const i=+t.closest('tr').dataset.i; const l=r.lineas[i];
+    if(t.dataset.ln==='cant'){ l.cant=t.value; save(); recalcFicha(); }
+    else if(t.dataset.ln==='ud'){ l.ud=t.value; save(); recalcFicha(); }
+    return; }
+  if(t.dataset.s){ const k=t.dataset.s; S.settings[k]= (k==='iva'||k==='objetivo')? (num(t.value)??'') : t.value; save(); return; }
+  if(t.id==='s-cats'){ S.settings.categorias=t.value.split('\n').map(x=>x.trim()).filter(Boolean); save(); return; }
+  const tr=t.closest('tr[data-ing]');
+  if(tr&&t.dataset.k){ const ing=ingById(tr.dataset.ing); ing[t.dataset.k]=t.value; save(); marcarIng();
+    const c=costeIng(ing);
+    tr.querySelector('[data-o=coniva]').innerHTML=conIvaCell(ing,c);
+    tr.querySelector('[data-o=neto]').innerHTML=c?'<b>'+eur(c.neto)+'</b> <span class="unit">/'+c.base+'</span>':'<span class="miss">Sin precio</span>';
+    if(t.dataset.k==='precio'||t.dataset.k==='iva') counts();
+  }
+});
+document.addEventListener('change',e=>{
+  const t=e.target; const fid=$('#ficha')?.dataset.id;
+  if(t.id==='f-fam'){ ui.ifam=t.value; render(); return; }
+  if(t.id==='f-prov'){ ui.iprov=t.value; render(); return; }
+  if(fid&&t.dataset.ln==='nombre'){ const r=recById(fid); const i=+t.closest('tr').dataset.i; const l=r.lineas[i];
+    l.ref=resolveRef(t.value,fid); const info=lineInfo(l); if(info.src){ const u=unitsFor(info.medida); if(!u.includes(l.ud)) l.ud=u[0]; }
+    save(); redrawLines(r); return; }
+  if(fid&&t.dataset.alg){ const r=recById(fid); const a=t.dataset.alg; r.alergenos = t.checked? [...new Set([...r.alergenos,a])] : r.alergenos.filter(x=>x!==a); save(); return; }
+  if(fid&&t.dataset.f==='rendimiento'){ return; }
+  if(t.closest('tr[data-ing]')&&t.dataset.k==='medida'){ const ing=ingById(t.closest('tr').dataset.ing); ing.contenidoUd= ing.medida==='L'?'L':'kg'; if(ing.medida==='ud') ing.contenido=''; save(); render(); return; }
+  if(t.id==='f-foto'&&t.files.length){ const r=recById(fid); const files=[...t.files].slice(0,MAX_FOTOS-(r.fotos||[]).length);
+    (async()=>{ for(const f of files){ try{ const d=await readPhoto(f); r.fotos=r.fotos||[]; r.fotos.push(await putFoto(d)); }catch(e){ toast('No se pudo leer una de las imágenes'); } } save(); render(); recalcFicha(); if(t.files.length>files.length) toast(`Máximo ${MAX_FOTOS} fotos por receta`); })(); return; }
+  if((t.id==='imp-precios'||t.id==='imp-todo')&&t.files[0]){ const mode=t.id; const f=t.files[0]; f.text().then(txt=>importar(JSON.parse(txt),mode)).catch(()=>toast('El archivo no es una copia válida')).finally(()=>{t.value='';}); }
+});
+function readPhoto(file){ return new Promise((res,rej)=>{ const img=new Image(); const url=URL.createObjectURL(file); img.onload=()=>{ const max=1100; const sc=Math.min(1,max/Math.max(img.width,img.height)); const c=document.createElement('canvas'); c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc); c.getContext('2d').drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg',0.8)); }; img.onerror=rej; img.src=url; }); }
+function importar(data,mode){
+  if(!data||!Array.isArray(data.ingredientes)) throw new Error('formato');
+  const map={}; let nuevos=0, act=0;
+  for(const src of data.ingredientes){
+    let dst=S.ingredientes.find(x=>norm(x.nombre)===norm(src.nombre));
+    if(dst){ if(mode==='imp-precios'||num(dst.precio)==null){ ['precio','iva','proveedor','albaran','unidades','contenido','contenidoUd','merma','fecha','formato','medida','familia'].forEach(k=>{ if(src[k]!==undefined&&src[k]!=='') dst[k]=src[k]; }); act++; } }
+    else { dst={...src,id:uid()}; S.ingredientes.push(dst); nuevos++; }
+    map[src.id]=dst.id;
+  }
+  let recs=0;
+  if(mode==='imp-todo'&&Array.isArray(data.recetas)){
+    const rmap={}; const nuevas=data.recetas.map(r=>{ const c=JSON.parse(JSON.stringify(r)); rmap[r.id]=c.id=uid(); return c; });
+    nuevas.forEach(c=>{ c.fotos=Array.isArray(c.fotos)?c.fotos.filter(f=>String(f).startsWith('data:')):(c.foto?[c.foto]:[]); delete c.foto; c.lineas=(c.lineas||[]).map(l=>{ const ref=l.ref||''; if(ref.startsWith('i:')) return {...l,ref:map[ref.slice(2)]?'i:'+map[ref.slice(2)]:ref}; if(ref.startsWith('r:')) return {...l,ref:rmap[ref.slice(2)]?'r:'+rmap[ref.slice(2)]:ref}; return l; }); c.alergenos=c.alergenos||[]; S.recetas.push(c); recs++; });
+    if(data.settings&&Array.isArray(data.settings.categorias)) data.settings.categorias.forEach(c=>{ if(!S.settings.categorias.includes(c)) S.settings.categorias.push(c); });
+  }
+  save(); render(); toast(mode==='imp-precios'? `${act} ingredientes actualizados, ${nuevos} nuevos` : `${recs} recetas añadidas, ${nuevos} ingredientes nuevos`);
+}
+
+setTab(ui.tab);
+})();
+</script>
+
+</body>
+</html>

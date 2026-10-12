@@ -530,7 +530,6 @@ function vFicha(r){
   const cats=S.settings.categorias.includes(r.categoria)||!r.categoria?S.settings.categorias:[...S.settings.categorias,r.categoria];
   return `<section class="view" id="ficha" data-id="${r.id}">
   <div class="bar"><button class="btn ghost" data-act="volver">← Recetario</button><div class="grow"></div>
-    <button class="btn" data-act="duplicar">Duplicar</button>
     <button class="btn primary" data-act="pdf">Descargar PDF</button>
     <span id="del-slot"><button class="btn danger" data-act="borrar-pedir">Eliminar</button></span></div>
   <div class="ficha-head">

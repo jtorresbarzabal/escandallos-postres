@@ -279,6 +279,23 @@ fieldset.ro{border:0;padding:0;margin:0;min-width:0}
 fieldset.ro[disabled] input,fieldset.ro[disabled] select{border-color:transparent;background:transparent;color:var(--ink);-webkit-text-fill-color:var(--ink);opacity:1;appearance:none;-webkit-appearance:none;box-shadow:none;cursor:default;padding-left:2px}
 fieldset.ro[disabled] input::placeholder{color:transparent}
 fieldset.ro[disabled] td.del,fieldset.ro[disabled] [data-act=del-ing]{display:none}
+.ing-list{display:grid;gap:8px}
+.ing-it{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ing-it[open]{border-color:var(--gold);box-shadow:0 4px 16px rgba(36,87,245,.10)}
+.ing-it summary{list-style:none;display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer}
+.ing-it summary::-webkit-details-marker{display:none}
+.ii-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.ii-n{font-weight:700}
+.ii-m{font-size:12.5px;color:var(--muted)}
+.ii-p{text-align:right;white-space:nowrap}
+.ii-p b{font-size:15.5px;color:var(--gold-ink)}
+.ii-p small{color:var(--muted);margin-left:2px}
+.ii-ch{font-size:22px;color:var(--muted);transition:transform .15s}
+.ing-it[open] .ii-ch{transform:rotate(90deg)}
+.ii-body{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px 18px;padding:4px 14px 14px;border-top:1px dashed var(--line);background:var(--gold-soft)}
+.ii-body > div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dotted var(--line);font-size:14px}
+.ii-body span{color:var(--muted)}
+.ii-body b{text-align:right}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:30px;font-weight:600;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
 .confirm{display:inline-flex;gap:6px;align-items:center;background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:4px 8px;font-size:13px;font-weight:600}
 .notice{background:var(--warn-soft);color:var(--warn);border-radius:var(--r);padding:10px 14px;font-size:14px;font-weight:600}
@@ -705,7 +722,7 @@ function recalcFicha(){
 /* ---------- Vista: Ingredientes ---------- */
 function vIngredientes(){
   const q=norm(ui.iq);
-  const list=S.ingredientes.filter(i=>(ui.ifam==='Todas'||i.familia===ui.ifam)&&(!ui.iprov||i.proveedor===ui.iprov)&&(!q||norm(i.nombre).includes(q))).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+  const list=S.ingredientes.filter(i=>(ui.ifam==='Todas'||i.familia===ui.ifam)&&(!ui.iprov||i.proveedor===ui.iprov)&&(!q||norm(i.nombre).includes(q))).sort((a,b)=>{ const pa=q&&norm(a.nombre).startsWith(q)?0:1, pb=q&&norm(b.nombre).startsWith(q)?0:1; return pa-pb||a.nombre.localeCompare(b.nombre,'es'); });
   const sin=S.ingredientes.filter(i=>num(i.precio)==null).length;
   const sinIva=S.ingredientes.filter(i=>num(i.precio)!=null&&num(i.iva)==null).length;
   return `<section class="view">
@@ -715,13 +732,14 @@ function vIngredientes(){
     ? '<div class="lockbar on"><span>🔓 <b>Modo edición de la profesora.</b> Puedes añadir y modificar ingredientes.</span><button class="btn small" data-act="bloquear">Bloquear</button></div>'
     : '<div class="lockbar"><span>🔒 <b>Solo consulta.</b> Únicamente la profesora puede añadir o modificar ingredientes.</span><button class="btn small" data-act="desbloquear-ing">Editar (profesora)</button></div>'}
   ${desbloqueado?`<div class="tip"><b>Cómo se rellena:</b> copia del albarán el <b>precio sin IVA</b> y el <b>tipo de IVA</b>; la app calcula el precio con IVA y el coste por kg, litro o unidad que usan los escandallos (todos los costes de las recetas llevan el IVA incluido). Ejemplo real: harina Brisa a 1,15 €/kg + 4 % de IVA = 1,20 €/kg; azúcar en saco de 25 kg a 20,69 € + 10 % = 22,76 € → 0,91 €/kg. ${PRECIOS_CENTRO.items.length?`Precios cargados: <b>albaranes del curso ${esc(PRECIOS_CENTRO.curso)}</b>.`:''}</div>`:''}
-  <div class="bar"><input type="search" id="q-ing" placeholder="Buscar ingrediente" value="${esc(ui.iq)}" style="max-width:280px">
+  <div class="bar"><input type="search" id="q-ing" autocomplete="off" placeholder="Buscar ingrediente (escribe la primera letra)" value="${esc(ui.iq)}" style="max-width:280px">
     <select id="f-fam" style="max-width:240px" aria-label="Familia"><option>Todas</option>${FAMILIAS.map(f=>`<option ${f===ui.ifam?'selected':''}>${esc(f)}</option>`).join('')}</select>
     <select id="f-prov" style="max-width:240px" aria-label="Proveedor"><option value="">Todos los proveedores</option>${[...new Set(S.ingredientes.map(i=>i.proveedor).filter(Boolean))].sort().map(p=>`<option ${p===ui.iprov?'selected':''}>${esc(p)}</option>`).join('')}</select>
-    <span class="grow"></span>${sinIva?`<span class="pill warn">${sinIva} sin tipo de IVA</span>`:''}${sin?`<span class="pill warn">${sin} sin precio</span>`:'<span class="pill ok">Todos con precio</span>'}</div>
-  <fieldset class="ro" ${desbloqueado?'':'disabled'}><div class="tbl-wrap"><table class="ing-tbl"><thead><tr>
+    <span class="grow"></span>${desbloqueado?(sinIva?`<span class="pill warn">${sinIva} sin tipo de IVA</span>`:'')+(sin?`<span class="pill warn">${sin} sin precio</span>`:'<span class="pill ok">Todos con precio</span>'):''}</div>
+  ${!desbloqueado? `<div class="sub" style="margin-top:-6px">${list.length} ingredientes · Toca uno para ver toda su información.</div><div class="ing-list">${list.map(ingItem).join('')||'<div class="empty">No hay ingredientes con ese filtro.</div>'}</div>` : ''}
+  ${desbloqueado? '' : '<!--'}<fieldset class="ro"><div class="tbl-wrap"><table class="ing-tbl"><thead><tr>
     <th>Ingrediente</th><th>Se usa en</th><th>Familia</th><th>Proveedor</th><th>Nº albarán</th><th>Fecha albarán</th><th class="r">Precio sin IVA €</th><th>IVA</th><th class="r">Precio con IVA</th><th class="r">Nº unidades</th><th>Contenido de cada unidad</th><th>Formato</th><th class="r">Merma %</th><th class="r">Coste (IVA incl.)</th><th class="r">Recetas</th><th></th></tr></thead>
-    <tbody id="ing-body">${list.map(ingRow).join('')||'<tr><td colspan="16" class="sub" style="padding:16px">No hay ingredientes con ese filtro.</td></tr>'}</tbody></table></div></fieldset>
+    <tbody id="ing-body">${list.map(ingRow).join('')||'<tr><td colspan="16" class="sub" style="padding:16px">No hay ingredientes con ese filtro.</td></tr>'}</tbody></table></div></fieldset>${desbloqueado? '' : '-->'}
   <div class="save-bar" id="save-bar" ${ingDirty?'':'hidden'} role="region" aria-label="Cambios sin guardar">
     <span class="sb-dot" aria-hidden="true"></span><span class="sb-txt">${nCambios===1?'1 cambio sin guardar':nCambios+' cambios sin guardar'}</span>
     <span class="grow"></span>
@@ -729,8 +747,32 @@ function vIngredientes(){
     <button class="btn-save dirty" data-act="guardar-ing">GUARDAR CAMBIOS</button>
   </div>
   <datalist id="dl-prov">${[...new Set(S.ingredientes.map(i=>i.proveedor).filter(Boolean))].map(p=>`<option value="${esc(p)}"></option>`).join('')}</datalist>
-  <div class="sub">«Se usa en» indica cómo se mide en las recetas: por peso (kg/g), por volumen (L/ml) o por unidades. Si dejas vacío el contenido, el precio se toma por kg o por litro directamente.</div>
+  <div class="sub" ${desbloqueado?'':'hidden'}>«Se usa en» indica cómo se mide en las recetas: por peso (kg/g), por volumen (L/ml) o por unidades. Si dejas vacío el contenido, el precio se toma por kg o por litro directamente.</div>
   </section>`;
+}
+function ingItem(i){
+  const c=costeIng(i); const u=usos(i.id);
+  const fecha=i.fecha?new Date(i.fecha).toLocaleDateString('es-ES'):'—';
+  const med={kg:'Peso (g / kg)',L:'Volumen (ml / L)',ud:'Unidades'}[i.medida]||'—';
+  const cont = i.medida==='ud'? (num(i.unidades)? num(i.unidades)+' unidades por compra':'1 unidad') : (num(i.contenido)? fmt(num(i.contenido),3)+' '+(i.contenidoUd||'') : '—');
+  const row=(k,v)=>`<div><span>${k}</span><b>${v}</b></div>`;
+  return `<details class="ing-it" id="ing-${i.id}">
+    <summary><span class="ii-main"><span class="ii-n">${esc(i.nombre)}</span><span class="ii-m">${esc(i.familia||'')}${i.proveedor?' · '+esc(i.proveedor):''}</span></span>
+      <span class="ii-p num">${c?`<b>${eur(c.neto)}</b><small>/${c.base}</small>`:'<span class="miss">Sin precio</span>'}</span><span class="ii-ch" aria-hidden="true">›</span></summary>
+    <div class="ii-body">
+      ${row('Proveedor',esc(i.proveedor||'—'))}
+      ${row('Nº de albarán',esc(i.albaran||'—'))}
+      ${row('Fecha del albarán',fecha)}
+      ${row('Formato de compra',esc(i.formato||'—'))}
+      ${row('Precio sin IVA',num(i.precio)!=null?eur(num(i.precio)):'—')}
+      ${row('Tipo de IVA',num(i.iva)!=null?num(i.iva)+' %':'<span class="miss">Falta</span>')}
+      ${row('Precio con IVA',c&&num(i.iva)!=null?eur(c.conIva):'—')}
+      ${row('Contenido',cont)}
+      ${row('Se mide en las recetas por',med)}
+      ${num(i.merma)?row('Merma',fmt(num(i.merma),1)+' %'):''}
+      ${row('Coste para escandallos (IVA incl.)',c?eur(c.neto)+' / '+c.base:'—')}
+      ${row('Usado en tus recetas',u? u+(u===1?' receta':' recetas'):'—')}
+    </div></details>`;
 }
 function conIvaCell(i,c){ if(!c) return '—'; return num(i.iva)==null? `<span class="miss">Falta IVA</span>` : eur(c.conIva); }
 function ingRow(i){
@@ -911,8 +953,9 @@ function nuevaReceta(){
 function abrir(id){ ui.ficha=id; ui.escala=''; setTab('ficha'); recalcFicha(); }
 /* ---------- Buscador desplegable de ingredientes ---------- */
 let acBox=null, acInput=null, acItems=[], acSel=-1, acPicking=false;
-function acOpciones(q,currentId){
+function acOpciones(q,currentId,modo){
   const nq=norm(q);
+  if(modo==='buscar'){ return S.ingredientes.filter(i=>!nq||norm(i.nombre).startsWith(nq)).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).map(i=>({tipo:'i',id:i.id,nombre:i.nombre,prov:i.proveedor||'',c:costeIng(i)})); }
   const ings=S.ingredientes.map(i=>({tipo:'i',id:i.id,nombre:i.nombre,prov:i.proveedor||'',c:costeIng(i),medida:i.medida}));
   const elabs=S.recetas.filter(r=>r.id!==currentId&&pesoReceta(r)>0).map(r=>({tipo:'r',id:r.id,nombre:'Elaboración: '+r.nombre,prov:'Elaboración propia'}));
   let list=[...ings,...elabs];
@@ -922,8 +965,9 @@ function acOpciones(q,currentId){
 }
 function acCerrar(){ if(acBox){ acBox.remove(); acBox=null; } if(acInput) acInput.setAttribute('aria-expanded','false'); acInput=null; acItems=[]; acSel=-1; }
 function acAbrir(inp){
-  const fid=$('#ficha')?.dataset.id; if(!fid) return;
-  acInput=inp; acItems=acOpciones(inp.value,fid); acSel=acItems.length?0:-1;
+  const modo=inp.id==='q-ing'?'buscar':'linea'; const fid=$('#ficha')?.dataset.id; if(modo==='linea'&&!fid) return;
+  if(modo==='buscar'&&!inp.value){ acCerrar(); return; }
+  acInput=inp; acItems=acOpciones(inp.value,fid,modo); acSel=acItems.length?0:-1;
   if(!acBox){ acBox=document.createElement('div'); acBox.className='ac'; acBox.setAttribute('role','listbox'); document.body.appendChild(acBox);
     acBox.addEventListener('mousedown',e=>e.preventDefault());
     acBox.addEventListener('click',e=>{ const it=e.target.closest('[data-k]'); if(it) acElegir(+it.dataset.k); }); }
@@ -938,13 +982,14 @@ function acAbrir(inp){
 }
 function acElegir(k){
   const o=acItems[k]; if(!o||!acInput) return;
+  if(acInput.id==='q-ing'){ acCerrar(); ui.iq=o.nombre; render(); const d=document.getElementById('ing-'+o.id); if(d){ d.open=true; d.scrollIntoView({behavior:'smooth',block:'center'}); } else { const tr=document.querySelector(`tr[data-ing="${o.id}"]`); tr&&tr.scrollIntoView({behavior:'smooth',block:'center'}); } return; }
   const fid=$('#ficha')?.dataset.id; const r=recById(fid); const i=+acInput.closest('tr').dataset.i; const l=r.lineas[i];
   l.ref=(o.tipo==='i'?'i:':'r:')+o.id;
   const info=lineInfo(l); if(info.src){ const u=unitsFor(info.medida); if(!u.includes(l.ud)) l.ud=u[0]; }
   acPicking=true; acCerrar(); save(); redrawLines(r); acPicking=false;
   const c=$(`#ln-c-${i}`); if(c){ c.focus(); c.select&&c.select(); }
 }
-document.addEventListener('focusin',e=>{ if(e.target.dataset&&e.target.dataset.ln==='nombre') acAbrir(e.target); });
+document.addEventListener('focusin',e=>{ if((e.target.dataset&&e.target.dataset.ln==='nombre')||e.target.id==='q-ing') acAbrir(e.target); });
 document.addEventListener('focusout',e=>{ if(e.target===acInput) setTimeout(()=>{ if(document.activeElement!==acInput) acCerrar(); },150); });
 document.addEventListener('keydown',e=>{
   if(!acBox||e.target!==acInput) return;
@@ -1007,7 +1052,7 @@ document.addEventListener('input',e=>{
   const t=e.target;
   if(t.dataset&&t.dataset.ln==='nombre'){ acAbrir(t); return; }
   if(t.id==='q-rec'){ ui.q=t.value; const pos=t.selectionStart; render(); const n=$('#q-rec'); n.focus(); n.setSelectionRange(pos,pos); return; }
-  if(t.id==='q-ing'){ ui.iq=t.value; const pos=t.selectionStart; render(); const n=$('#q-ing'); n.focus(); n.setSelectionRange(pos,pos); return; }
+  if(t.id==='q-ing'){ ui.iq=t.value; const pos=t.selectionStart; acCerrar(); render(); const n=$('#q-ing'); n.focus(); try{ n.setSelectionRange(pos,pos); }catch(e){} acAbrir(n); return; }
   if(t.id==='f-escala'){ ui.escala=t.value; recalcFicha(); return; }
   const fid=$('#ficha')?.dataset.id;
   if(fid&&t.dataset.f){ const r=recById(fid); r[t.dataset.f]=t.value; save(); recalcFicha(); return; }

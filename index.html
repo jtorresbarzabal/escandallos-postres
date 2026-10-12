@@ -8,29 +8,32 @@
 </head>
 <body>
 <title>Escandallos San Roque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700;800&display=swap">
 <style>
 /* Layout: barra de marca fija arriba, pestañas como separadores de recetario; vistas en una columna ancha con paneles laterales que se apilan en móvil */
 :root{
-  --bg:#F5F5FC; --surface:#FFFFFF; --sunk:#ECEDFA; --ink:#1F2148; --muted:#5F6290; --line:#DADCF2;
-  --gold:#A9AFEB; --gold-ink:#3B3F9E; --gold-soft:#E8E9FB; --on-gold:#1B1D52;
-  --strong:#4B4FB6; --on-strong:#FFFFFF;
-  --ok:#2F7A55; --ok-soft:#DDF2E6; --warn:#97630F; --warn-soft:#FCEFD8; --bad:#B4473C; --bad-soft:#FBE3E0;
-  --f-display:"Lucida Sans Unicode","Lucida Grande","Lucida Sans",Geneva,"Segoe UI",Verdana,system-ui,sans-serif;
-  --f-body:"Lucida Sans Unicode","Lucida Grande","Lucida Sans",Geneva,"Segoe UI",Verdana,system-ui,sans-serif;
-  --r:12px; --brand-bg:#CDD0F4; --brand-fg:#23255C; --brand-gold:#2E318A;
+  --bg:#F3F6FF; --surface:#FFFFFF; --sunk:#E9EFFF; --ink:#0F1B3D; --muted:#56618A; --line:#D9E1F7;
+  --gold:#2457F5; --gold-ink:#1A43C9; --gold-soft:#E4EBFF; --on-gold:#FFFFFF;
+  --strong:#FFC23D; --on-strong:#0F1B3D;
+  --ok:#14866D; --ok-soft:#DCF5EE; --warn:#A35F00; --warn-soft:#FFF1D6; --bad:#D6404E; --bad-soft:#FFE3E6;
+  --f-display:"Fira Sans","Lucida Sans Unicode","Lucida Grande",system-ui,sans-serif;
+  --f-body:"Fira Sans","Lucida Sans Unicode","Lucida Grande",system-ui,sans-serif;
+  --r:14px; --brand-bg:linear-gradient(120deg,#1238D8 0%,#2457F5 55%,#3F8CFF 100%); --brand-fg:#FFFFFF; --brand-gold:#FFC23D;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#13142A; --surface:#1B1D38; --sunk:#232548; --ink:#E7E8FA; --muted:#A3A6D0; --line:#30335A;
-  --gold:#8F96E6; --gold-ink:#B9BEF3; --gold-soft:#262A55; --on-gold:#12143A;
-  --strong:#8F96E6; --on-strong:#12143A;
-  --ok:#74C69A; --ok-soft:#1C3328; --warn:#EDB867; --warn-soft:#3A2E17; --bad:#EF8F84; --bad-soft:#3C211E;
-  --brand-bg:#2A2D63; --brand-fg:#E7E8FA; --brand-gold:#C3C7F6; color-scheme:dark}}
+  --bg:#0B1230; --surface:#121B42; --sunk:#18234F; --ink:#E8EEFF; --muted:#A5B2DD; --line:#26346B;
+  --gold:#5C86FF; --gold-ink:#9DB7FF; --gold-soft:#1C2A63; --on-gold:#FFFFFF;
+  --strong:#FFC23D; --on-strong:#0F1B3D;
+  --ok:#4FD1AE; --ok-soft:#10342D; --warn:#FFC266; --warn-soft:#3A2B10; --bad:#FF7A86; --bad-soft:#3D1820;
+  --brand-bg:linear-gradient(120deg,#0E2BA8 0%,#1C46D6 55%,#2F74F0 100%); --brand-fg:#FFFFFF; --brand-gold:#FFC23D; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#13142A; --surface:#1B1D38; --sunk:#232548; --ink:#E7E8FA; --muted:#A3A6D0; --line:#30335A;
-  --gold:#8F96E6; --gold-ink:#B9BEF3; --gold-soft:#262A55; --on-gold:#12143A;
-  --strong:#8F96E6; --on-strong:#12143A;
-  --ok:#74C69A; --ok-soft:#1C3328; --warn:#EDB867; --warn-soft:#3A2E17; --bad:#EF8F84; --bad-soft:#3C211E;
-  --brand-bg:#2A2D63; --brand-fg:#E7E8FA; --brand-gold:#C3C7F6; color-scheme:dark}
+  --bg:#0B1230; --surface:#121B42; --sunk:#18234F; --ink:#E8EEFF; --muted:#A5B2DD; --line:#26346B;
+  --gold:#5C86FF; --gold-ink:#9DB7FF; --gold-soft:#1C2A63; --on-gold:#FFFFFF;
+  --strong:#FFC23D; --on-strong:#0F1B3D;
+  --ok:#4FD1AE; --ok-soft:#10342D; --warn:#FFC266; --warn-soft:#3A2B10; --bad:#FF7A86; --bad-soft:#3D1820;
+  --brand-bg:linear-gradient(120deg,#0E2BA8 0%,#1C46D6 55%,#2F74F0 100%); --brand-fg:#FFFFFF; --brand-gold:#FFC23D; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
 h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
@@ -42,20 +45,20 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* Cabecera */
 .brand{background:var(--brand-bg);color:var(--brand-fg);padding-inline:16px}
 .brand-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:16px;padding-block:14px;flex-wrap:wrap}
-.brand img{width:64px;height:64px;border-radius:50%;flex:none;background:#fff}
+.brand img{width:64px;height:64px;border-radius:50%;flex:none;background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
 .brand-txt{min-width:0;flex:1}
 .brand-txt .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.75}
-.brand-txt h1{font-size:clamp(22px,3.2vw,30px);font-weight:800;color:var(--brand-gold)}
+.brand-txt h1{font-size:clamp(22px,3.2vw,32px);font-weight:800;color:#FFFFFF;letter-spacing:-.01em}
 .brand .meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;opacity:.92;margin-top:4px}
-.brand .meta b{font-weight:600;color:var(--brand-gold)}
+.brand .meta b{font-weight:700;color:var(--brand-gold)}
 .btn-save{flex:none;display:inline-flex;align-items:center;gap:8px;background:var(--strong);color:var(--on-strong);border:0;border-radius:12px;padding:9px 20px;margin-block:6px;font-family:var(--f-display);font-weight:800;font-size:15px;letter-spacing:.08em;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.25)}
 .btn-save:hover{filter:brightness(1.08)}
 .btn-save .dot{width:9px;height:9px;border-radius:50%;background:currentColor;opacity:.35}
-.btn-save.dirty{box-shadow:0 0 0 3px rgba(75,79,182,.35),0 2px 0 rgba(0,0,0,.25);animation:pulse 1.6s ease-in-out infinite}
+.btn-save.dirty{box-shadow:0 0 0 3px rgba(255,194,61,.45),0 2px 0 rgba(0,0,0,.25);animation:pulse 1.6s ease-in-out infinite}
 .btn-save.dirty .dot{background:#F3A79E;opacity:1}
-@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(75,79,182,.12),0 2px 0 rgba(0,0,0,.25)}}
+@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(255,194,61,.15),0 2px 0 rgba(0,0,0,.25)}}
 @media (max-width:560px){.btn-save{padding:8px 12px;font-size:13px}}
-.modal-bg{position:fixed;inset:0;background:rgba(25,26,70,.45);display:grid;place-items:center;z-index:30;padding:16px}
+.modal-bg{position:fixed;inset:0;background:rgba(10,20,60,.5);display:grid;place-items:center;z-index:30;padding:16px}
 .modal{background:var(--surface);border-radius:14px;padding:22px;max-width:360px;width:100%;display:grid;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
 .modal h3{font-size:19px}
 .pin-in{font-size:24px;letter-spacing:.4em;text-align:center;font-variant-numeric:tabular-nums}
@@ -65,7 +68,7 @@ nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:v
 .tabs-wrap{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px}
 .tabs-in{flex:1;min-width:0;display:flex;gap:4px;overflow-x:auto;padding-top:8px;align-self:flex-end}
 .tab{border:1px solid transparent;border-bottom:none;background:none;padding:9px 16px;border-radius:10px 10px 0 0;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;margin-bottom:-1px}
-.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);border-color:var(--line);box-shadow:inset 0 3px 0 var(--gold)}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--gold-ink);border-color:var(--line);box-shadow:inset 0 3px 0 var(--gold)}
 .tab .count{font-size:12px;background:var(--sunk);border-radius:20px;padding:1px 7px;margin-left:6px;color:var(--muted)}
 
 main{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:22px 60px}
@@ -104,7 +107,7 @@ label.f > span small{font-weight:500}
 /* Recetario */
 .cats{display:flex;gap:6px;flex-wrap:wrap}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--gold);color:#fff;border-color:var(--gold)}
 .group h2{font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink);font-family:var(--f-body);font-weight:700;margin-bottom:10px;display:flex;gap:10px;align-items:center}
 .group h2::after{content:"";flex:1;height:1px;background:var(--line)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
@@ -238,7 +241,7 @@ td input,td select{padding:6px 8px}
 .save-bar .sb-dot{width:10px;height:10px;border-radius:50%;background:var(--bad)}
 .save-bar .sb-txt{font-weight:700}
 .save-bar .grow{flex:1}
-.save-bar .btn.ghost{color:var(--brand-fg);border-color:var(--gold);background:var(--surface)}
+.save-bar .btn.ghost{color:#fff;border-color:rgba(255,255,255,.5);background:transparent}
 .save-bar .btn-save{margin:0}
 @media (max-width:640px){.save-bar{padding:12px}.save-bar .grow{display:none}.save-bar .sb-txt{flex:1 1 100%}.save-bar .btn,.save-bar .btn-save{flex:1;justify-content:center}}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:30px;font-weight:600;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
@@ -745,12 +748,12 @@ async function pdfReceta(r){
   toast('Generando PDF…');
   const s=resumen(r), inc=s.falta.length>0, T=pdfSafe;
   const doc=new J({unit:'mm',format:'a4'}); const W=210,H=297,M=14,CW=W-2*M;
-  const INK=[31,33,72], MUT=[95,98,144], GOLD=[169,175,235], GOLDINK=[59,63,158], SOFT=[232,233,251], LINE=[218,220,242], HEAD=[205,208,244], NAVY=[35,37,92];
+  const INK=[15,27,61], MUT=[86,97,138], GOLD=[36,87,245], GOLDINK=[26,67,201], SOFT=[228,235,255], LINE=[217,225,247], HEAD=[36,87,245], NAVY=[255,255,255];
   // Cabecera
   doc.setFillColor(...HEAD); doc.rect(0,0,W,36,'F');
   try{ doc.addImage(LOGO,'JPEG',M,6,24,24); }catch(e){}
   const X=M+30;
-  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...GOLDINK);
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(255,194,61);
   doc.text(T('ESCUELA DE HOSTELERÍA SAN ROQUE  ·  FICHA TÉCNICA Y ESCANDALLO'),X,11);
   doc.setFontSize(17); doc.setTextColor(...NAVY);
   const tl=doc.splitTextToSize(T(r.nombre||'Receta sin nombre'),W-X-M); doc.text(tl.slice(0,2),X,18.5);

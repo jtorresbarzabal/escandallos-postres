@@ -8,27 +8,29 @@
 </head>
 <body>
 <title>Escandallos San Roque</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: barra de marca fija arriba, pestañas como separadores de recetario; vistas en una columna ancha con paneles laterales que se apilan en móvil */
 :root{
-  --bg:#F7F6F2; --surface:#FFFFFF; --sunk:#EFEDE6; --ink:#1C1B18; --muted:#6B675D; --line:#DEDAD0;
-  --gold:#B88A2E; --gold-ink:#7E5C14; --gold-soft:#F3E7C8; --on-gold:#1C1B18;
-  --ok:#2F7A4B; --ok-soft:#DDF0E3; --warn:#9A5B00; --warn-soft:#FBEBCF; --bad:#B23A2E; --bad-soft:#F8DEDA;
-  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
-  --f-body:"Manrope","Segoe UI",system-ui,sans-serif;
-  --r:10px; --brand-bg:#1C1B18; --brand-fg:#F2EEE5; --brand-gold:#D8B262;
+  --bg:#F5F5FC; --surface:#FFFFFF; --sunk:#ECEDFA; --ink:#1F2148; --muted:#5F6290; --line:#DADCF2;
+  --gold:#A9AFEB; --gold-ink:#3B3F9E; --gold-soft:#E8E9FB; --on-gold:#1B1D52;
+  --strong:#4B4FB6; --on-strong:#FFFFFF;
+  --ok:#2F7A55; --ok-soft:#DDF2E6; --warn:#97630F; --warn-soft:#FCEFD8; --bad:#B4473C; --bad-soft:#FBE3E0;
+  --f-display:"Lucida Sans Unicode","Lucida Grande","Lucida Sans",Geneva,"Segoe UI",Verdana,system-ui,sans-serif;
+  --f-body:"Lucida Sans Unicode","Lucida Grande","Lucida Sans",Geneva,"Segoe UI",Verdana,system-ui,sans-serif;
+  --r:12px; --brand-bg:#CDD0F4; --brand-fg:#23255C; --brand-gold:#2E318A;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#141310; --surface:#1D1B17; --sunk:#26231E; --ink:#EEE9DE; --muted:#A9A296; --line:#36322B;
-  --gold:#D8B262; --gold-ink:#E6C77F; --gold-soft:#3A3020; --on-gold:#1C1B18;
-  --ok:#6FC08C; --ok-soft:#1E3326; --warn:#F0B158; --warn-soft:#3A2C14; --bad:#F08A7E; --bad-soft:#3D1F1B; color-scheme:dark}}
+  --bg:#13142A; --surface:#1B1D38; --sunk:#232548; --ink:#E7E8FA; --muted:#A3A6D0; --line:#30335A;
+  --gold:#8F96E6; --gold-ink:#B9BEF3; --gold-soft:#262A55; --on-gold:#12143A;
+  --strong:#8F96E6; --on-strong:#12143A;
+  --ok:#74C69A; --ok-soft:#1C3328; --warn:#EDB867; --warn-soft:#3A2E17; --bad:#EF8F84; --bad-soft:#3C211E;
+  --brand-bg:#2A2D63; --brand-fg:#E7E8FA; --brand-gold:#C3C7F6; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#141310; --surface:#1D1B17; --sunk:#26231E; --ink:#EEE9DE; --muted:#A9A296; --line:#36322B;
-  --gold:#D8B262; --gold-ink:#E6C77F; --gold-soft:#3A3020; --on-gold:#1C1B18;
-  --ok:#6FC08C; --ok-soft:#1E3326; --warn:#F0B158; --warn-soft:#3A2C14; --bad:#F08A7E; --bad-soft:#3D1F1B; color-scheme:dark}
+  --bg:#13142A; --surface:#1B1D38; --sunk:#232548; --ink:#E7E8FA; --muted:#A3A6D0; --line:#30335A;
+  --gold:#8F96E6; --gold-ink:#B9BEF3; --gold-soft:#262A55; --on-gold:#12143A;
+  --strong:#8F96E6; --on-strong:#12143A;
+  --ok:#74C69A; --ok-soft:#1C3328; --warn:#EDB867; --warn-soft:#3A2E17; --bad:#EF8F84; --bad-soft:#3C211E;
+  --brand-bg:#2A2D63; --brand-fg:#E7E8FA; --brand-gold:#C3C7F6; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
 h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
@@ -46,14 +48,14 @@ button,input,select,textarea{font:inherit;color:inherit}
 .brand-txt h1{font-size:clamp(22px,3.2vw,30px);font-weight:800;color:var(--brand-gold)}
 .brand .meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;opacity:.92;margin-top:4px}
 .brand .meta b{font-weight:600;color:var(--brand-gold)}
-.btn-save{flex:none;display:inline-flex;align-items:center;gap:8px;background:var(--brand-gold);color:#1C1B18;border:0;border-radius:10px;padding:9px 20px;margin-block:6px;font-family:var(--f-display);font-weight:800;font-size:15px;letter-spacing:.08em;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.btn-save{flex:none;display:inline-flex;align-items:center;gap:8px;background:var(--strong);color:var(--on-strong);border:0;border-radius:12px;padding:9px 20px;margin-block:6px;font-family:var(--f-display);font-weight:800;font-size:15px;letter-spacing:.08em;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.25)}
 .btn-save:hover{filter:brightness(1.08)}
-.btn-save .dot{width:9px;height:9px;border-radius:50%;background:#1C1B18;opacity:.25}
-.btn-save.dirty{box-shadow:0 0 0 3px rgba(216,178,98,.45),0 2px 0 rgba(0,0,0,.25);animation:pulse 1.6s ease-in-out infinite}
-.btn-save.dirty .dot{background:#B23A2E;opacity:1}
-@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(216,178,98,.15),0 2px 0 rgba(0,0,0,.25)}}
+.btn-save .dot{width:9px;height:9px;border-radius:50%;background:currentColor;opacity:.35}
+.btn-save.dirty{box-shadow:0 0 0 3px rgba(75,79,182,.35),0 2px 0 rgba(0,0,0,.25);animation:pulse 1.6s ease-in-out infinite}
+.btn-save.dirty .dot{background:#F3A79E;opacity:1}
+@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(75,79,182,.12),0 2px 0 rgba(0,0,0,.25)}}
 @media (max-width:560px){.btn-save{padding:8px 12px;font-size:13px}}
-.modal-bg{position:fixed;inset:0;background:rgba(20,19,16,.55);display:grid;place-items:center;z-index:30;padding:16px}
+.modal-bg{position:fixed;inset:0;background:rgba(25,26,70,.45);display:grid;place-items:center;z-index:30;padding:16px}
 .modal{background:var(--surface);border-radius:14px;padding:22px;max-width:360px;width:100%;display:grid;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
 .modal h3{font-size:19px}
 .pin-in{font-size:24px;letter-spacing:.4em;text-align:center;font-variant-numeric:tabular-nums}
@@ -73,7 +75,7 @@ main{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:22px 60px}
 .h-sec{font-size:22px;font-weight:700}
 .sub{color:var(--muted);font-size:14px}
 
-.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:10px;font-weight:600;cursor:pointer;white-space:nowrap}
 .btn:hover{border-color:var(--gold)}
 .btn.primary{background:var(--gold);border-color:var(--gold);color:var(--on-gold)}
 .btn.primary:hover{filter:brightness(1.05)}
@@ -231,6 +233,14 @@ td input,td select{padding:6px 8px}
 .big-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px;font-size:16px;text-decoration:none;white-space:normal;color:inherit}
 .big-btn small{font-weight:500;font-size:12.5px;opacity:.85}
 .btn.primary.big-btn{color:var(--on-gold)}
+.save-bar{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:6;display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--brand-bg);color:var(--brand-fg);border-radius:14px;padding:10px 12px 10px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.save-bar[hidden]{display:none}
+.save-bar .sb-dot{width:10px;height:10px;border-radius:50%;background:var(--bad)}
+.save-bar .sb-txt{font-weight:700}
+.save-bar .grow{flex:1}
+.save-bar .btn.ghost{color:var(--brand-fg);border-color:var(--gold);background:var(--surface)}
+.save-bar .btn-save{margin:0}
+@media (max-width:640px){.save-bar{padding:12px}.save-bar .grow{display:none}.save-bar .sb-txt{flex:1 1 100%}.save-bar .btn,.save-bar .btn-save{flex:1;justify-content:center}}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:30px;font-weight:600;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
 .confirm{display:inline-flex;gap:6px;align-items:center;background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:4px 8px;font-size:13px;font-weight:600}
 .notice{background:var(--warn-soft);color:var(--warn);border-radius:var(--r);padding:10px 14px;font-size:14px;font-weight:600}
@@ -310,7 +320,10 @@ let hayCambios=false;
 const KEY_PRECIOS='ehsr-escandallos-precios-v1';
 const PIN='1978';
 let desbloqueado=false, ingDirty=false, dbh=null;
-function marcarIng(){ ingDirty=true; const b=document.getElementById('btn-guardar'); if(b) b.classList.add('dirty'); const n=document.getElementById('ing-aviso'); if(n) n.hidden=false; }
+let ingSnap=null, nCambios=0;
+function snapIng(){ ingSnap=JSON.stringify(S.ingredientes); }
+function marcarIng(){ ingDirty=true; nCambios++; const b=document.getElementById('btn-guardar'); if(b) b.classList.add('dirty'); pintarBarra(); }
+function pintarBarra(){ const bar=document.getElementById('save-bar'); if(!bar) return; bar.hidden=!ingDirty; const t=bar.querySelector('.sb-txt'); if(t) t.textContent= nCambios===1?'1 cambio sin guardar':nCambios+' cambios sin guardar'; }
 function aplicarGuardados(list){
   if(!Array.isArray(list)||!list.length) return false;
   const usados=new Set(S.recetas.flatMap(r=>r.lineas.map(l=>l.ref)));
@@ -325,14 +338,21 @@ function aplicarGuardados(list){
   return true;
 }
 try{ const raw=localStorage.getItem(KEY_PRECIOS); if(raw){ const d=JSON.parse(raw); aplicarGuardados(d.ingredientes); } }catch(e){}
-(async()=>{ try{ if(window.claude&&window.claude.use){ dbh=await window.claude.use('db'); if(dbh){ const snap=await dbh.doc('config/precios').get(); if(snap.exists&&!ingDirty){ const d=snap.data(); if(aplicarGuardados(d.ingredientes)){ render(); if(ui.tab==='ficha') recalcFicha(); } } } } }catch(e){} })();
+snapIng();
+(async()=>{ try{ if(window.claude&&window.claude.use){ dbh=await window.claude.use('db'); if(dbh){ const snap=await dbh.doc('config/precios').get(); if(snap.exists&&!ingDirty){ const d=snap.data(); if(aplicarGuardados(d.ingredientes)){ snapIng(); render(); if(ui.tab==='ficha') recalcFicha(); } } } } }catch(e){} })();
+function okGuardado(msg){
+  if(!msg){ toast('No se ha podido guardar en este navegador'); return; }
+  const bg=document.createElement('div'); bg.className='modal-bg';
+  bg.innerHTML=`<div class="modal" role="alertdialog" style="text-align:center"><div style="font-size:42px;line-height:1">✅</div><h3>${esc(msg)}</h3><div class="sub">Los precios y nombres de ingredientes quedan guardados de forma permanente.</div><button class="btn primary" id="ok-close" style="justify-content:center">Aceptar</button></div>`;
+  document.body.appendChild(bg); const c=()=>bg.remove(); bg.querySelector('#ok-close').onclick=c; bg.addEventListener('click',e=>{ if(e.target===bg) c(); }); bg.querySelector('#ok-close').focus();
+}
 async function guardarPrecios(){
   const data={ingredientes:JSON.parse(JSON.stringify(S.ingredientes)),guardado:new Date().toISOString()};
   let local=false, compartido=false;
   try{ localStorage.setItem(KEY_PRECIOS,JSON.stringify(data)); local=true; }catch(e){}
   if(dbh){ try{ await dbh.doc('config/precios').set(data); compartido=true; }catch(e){} }
-  if(compartido||local){ ingDirty=false; if(ui.tab==='ajustes') render(); }
-  toast(compartido? 'Guardado: precios y nombres actualizados para todos' : local? 'Guardado en este dispositivo' : 'No se ha podido guardar en este navegador');
+  if(compartido||local){ ingDirty=false; nCambios=0; snapIng(); if(ui.tab==='ajustes'||ui.tab==='ingredientes') render(); }
+  okGuardado(compartido? 'Cambios guardados para todos los usuarios' : local? 'Cambios guardados en este dispositivo' : null);
 }
 function pedirPin(onOk,titulo){
   const bg=document.createElement('div'); bg.className='modal-bg';
@@ -616,7 +636,6 @@ function vIngredientes(){
   <div class="bar"><div class="grow"><h2 class="h-sec">Ingredientes y precios</h2><div class="sub">Lista común para todas las recetas. Si cambias un precio aquí, se actualizan todos los escandallos.</div></div>
     <button class="btn primary" data-act="add-ing">+ Añadir ingrediente</button></div>
   <div class="tip"><b>Cómo se rellena:</b> copia del albarán el <b>precio sin IVA</b> y el <b>tipo de IVA</b>; la app calcula el precio con IVA y el coste por kg, litro o unidad que usan los escandallos (todos los costes de las recetas llevan el IVA incluido). Ejemplo real: harina Brisa a 1,15 €/kg + 4 % de IVA = 1,20 €/kg; azúcar en saco de 25 kg a 20,69 € + 10 % = 22,76 € → 0,91 €/kg. ${PRECIOS_CENTRO.items.length?`Precios cargados: <b>albaranes del curso ${esc(PRECIOS_CENTRO.curso)}</b>.`:''}</div>
-  <div class="notice" id="ing-aviso" ${ingDirty?'':'hidden'}>Has cambiado precios o nombres. Para que se conserven, ve a <button class="linkbtn" data-act="ir-ajustes">Ajustes</button> y pulsa GUARDAR (necesita código).</div>
   <div class="bar"><input type="search" id="q-ing" placeholder="Buscar ingrediente" value="${esc(ui.iq)}" style="max-width:280px">
     <select id="f-fam" style="max-width:240px" aria-label="Familia"><option>Todas</option>${FAMILIAS.map(f=>`<option ${f===ui.ifam?'selected':''}>${esc(f)}</option>`).join('')}</select>
     <select id="f-prov" style="max-width:240px" aria-label="Proveedor"><option value="">Todos los proveedores</option>${[...new Set(S.ingredientes.map(i=>i.proveedor).filter(Boolean))].sort().map(p=>`<option ${p===ui.iprov?'selected':''}>${esc(p)}</option>`).join('')}</select>
@@ -624,6 +643,12 @@ function vIngredientes(){
   <div class="tbl-wrap"><table class="ing-tbl"><thead><tr>
     <th>Ingrediente</th><th>Se usa en</th><th>Familia</th><th>Proveedor</th><th>Nº albarán</th><th>Fecha albarán</th><th class="r">Precio sin IVA €</th><th>IVA</th><th class="r">Precio con IVA</th><th class="r">Nº unidades</th><th>Contenido de cada unidad</th><th>Formato</th><th class="r">Merma %</th><th class="r">Coste (IVA incl.)</th><th class="r">Recetas</th><th></th></tr></thead>
     <tbody id="ing-body">${list.map(ingRow).join('')||'<tr><td colspan="16" class="sub" style="padding:16px">No hay ingredientes con ese filtro.</td></tr>'}</tbody></table></div>
+  <div class="save-bar" id="save-bar" ${ingDirty?'':'hidden'} role="region" aria-label="Cambios sin guardar">
+    <span class="sb-dot" aria-hidden="true"></span><span class="sb-txt">${nCambios===1?'1 cambio sin guardar':nCambios+' cambios sin guardar'}</span>
+    <span class="grow"></span>
+    <button class="btn ghost" data-act="descartar">Descartar</button>
+    <button class="btn-save dirty" data-act="guardar-ing">GUARDAR CAMBIOS</button>
+  </div>
   <datalist id="dl-prov">${[...new Set(S.ingredientes.map(i=>i.proveedor).filter(Boolean))].map(p=>`<option value="${esc(p)}"></option>`).join('')}</datalist>
   <div class="sub">«Se usa en» indica cómo se mide en las recetas: por peso (kg/g), por volumen (L/ml) o por unidades. Si dejas vacío el contenido, el precio se toma por kg o por litro directamente.</div>
   </section>`;
@@ -720,16 +745,16 @@ async function pdfReceta(r){
   toast('Generando PDF…');
   const s=resumen(r), inc=s.falta.length>0, T=pdfSafe;
   const doc=new J({unit:'mm',format:'a4'}); const W=210,H=297,M=14,CW=W-2*M;
-  const INK=[28,27,24], MUT=[107,103,93], GOLD=[184,138,46], GOLDINK=[126,92,20], SOFT=[243,231,200], LINE=[222,218,208];
+  const INK=[31,33,72], MUT=[95,98,144], GOLD=[169,175,235], GOLDINK=[59,63,158], SOFT=[232,233,251], LINE=[218,220,242], HEAD=[205,208,244], NAVY=[35,37,92];
   // Cabecera
-  doc.setFillColor(...INK); doc.rect(0,0,W,36,'F');
+  doc.setFillColor(...HEAD); doc.rect(0,0,W,36,'F');
   try{ doc.addImage(LOGO,'JPEG',M,6,24,24); }catch(e){}
   const X=M+30;
-  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(216,178,98);
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...GOLDINK);
   doc.text(T('ESCUELA DE HOSTELERÍA SAN ROQUE  ·  FICHA TÉCNICA Y ESCANDALLO'),X,11);
-  doc.setFontSize(17); doc.setTextColor(255,255,255);
+  doc.setFontSize(17); doc.setTextColor(...NAVY);
   const tl=doc.splitTextToSize(T(r.nombre||'Receta sin nombre'),W-X-M); doc.text(tl.slice(0,2),X,18.5);
-  doc.setFont('helvetica','normal'); doc.setFontSize(8.3); doc.setTextColor(232,226,214);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.3); doc.setTextColor(...NAVY);
   doc.text(T(`Módulo: Postres en Restauración  ·  Profesora: Eva Díaz Campos  ·  Alumno/a: ${r.alumno||'—'}${S.settings.curso?'  ·  '+S.settings.curso:''}`),X,tl.length>1?31:27,{maxWidth:W-X-M});
   let y=42;
   // Datos
@@ -772,7 +797,7 @@ async function pdfReceta(r){
   let ax=M; doc.setFontSize(8);
   for(const a of ALERGENOS){ const on=r.alergenos.includes(a); const w=doc.getTextWidth(T(a))+6;
     if(ax+w>W-M){ ax=M; y+=7; need(8); }
-    if(on){ doc.setFillColor(...INK); doc.roundedRect(ax,y-3.6,w,5.4,2.6,2.6,'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); }
+    if(on){ doc.setFillColor(...GOLDINK); doc.roundedRect(ax,y-3.6,w,5.4,2.6,2.6,'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); }
     else { doc.setDrawColor(200,196,186); doc.roundedRect(ax,y-3.6,w,5.4,2.6,2.6,'S'); doc.setTextColor(...MUT); doc.setFont('helvetica','normal'); }
     doc.text(T(a),ax+3,y+.4); ax+=w+2; }
   y+=9;
@@ -823,6 +848,9 @@ document.addEventListener('click',e=>{
     case 'nueva': nuevaReceta(); break;
     case 'desbloquear': pedirPin(()=>render()); break;
     case 'guardar': if(desbloqueado) guardarPrecios(); break;
+    case 'guardar-ing': if(desbloqueado) guardarPrecios(); else pedirPin(()=>guardarPrecios(),'Confirmar y guardar cambios'); break;
+    case 'descartar': { const bg=document.createElement('div'); bg.className='modal-bg'; bg.innerHTML=`<div class="modal"><h3>¿Descartar los cambios?</h3><div class="sub">Se recuperan los precios y nombres guardados por última vez.</div><div class="bar"><button class="btn ghost" id="d-no">Cancelar</button><span class="grow"></span><button class="btn danger" id="d-si">Sí, descartar</button></div></div>`; document.body.appendChild(bg);
+      bg.querySelector('#d-no').onclick=()=>bg.remove(); bg.querySelector('#d-si').onclick=()=>{ S.ingredientes=JSON.parse(ingSnap); ingDirty=false; nCambios=0; bg.remove(); render(); toast('Cambios descartados'); }; break; }
     case 'ir-ajustes': setTab('ajustes'); if(!desbloqueado) pedirPin(()=>render()); break;
     case 'volver': ui.ficha=null; setTab('recetario'); break;
     case 'add-linea': r.lineas.push({ref:'',cant:'',ud:'g'}); save(); redrawLines(r); $(`#ln-n-${r.lineas.length-1}`)?.focus(); break;

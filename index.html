@@ -362,6 +362,7 @@ footer{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:0 30px;c
 .am-p .pill{font-size:11px}
 .am-x{border:none;background:none;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 0;text-decoration:underline}
 .ing-tbl tr.upd td{background:var(--ok-soft)}
+@media (max-width:640px){.tbl-wrap tr.upd{background:var(--ok-soft);border:2px solid var(--ok)}.tbl-wrap tr.upd td{background:transparent}}
 .alb-viewer{position:fixed;inset:0;z-index:40;background:rgba(5,10,30,.92);display:flex;flex-direction:column}
 .alb-viewer .bar{padding:10px 14px;color:#fff;justify-content:flex-end}
 .alb-viewer .btn{background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.35)}
@@ -460,7 +461,8 @@ const KEY_PRECIOS='ehsr-escandallos-precios-v1';
 const PIN='1978';
 let desbloqueado=false, ingDirty=false, dbh=null;
 let ingSnap=null, nCambios=0;
-function snapIng(){ ingSnap=JSON.stringify(S.ingredientes); }
+const ingNuevos=new Set();
+function snapIng(){ ingNuevos.clear();  ingSnap=JSON.stringify(S.ingredientes); }
 function marcarIng(){ ingDirty=true; nCambios++; const b=document.getElementById('btn-guardar'); if(b) b.classList.add('dirty'); pintarBarra(); }
 function pintarBarra(){ const bar=document.getElementById('save-bar'); if(!bar) return; bar.hidden=!ingDirty; const t=bar.querySelector('.sb-txt'); if(t) t.textContent= nCambios===1?'1 cambio sin guardar':nCambios+' cambios sin guardar'; }
 function aplicarGuardados(list){
@@ -865,7 +867,7 @@ function recalcFicha(){
 /* ---------- Vista: Ingredientes ---------- */
 function vIngredientes(){
   const q=norm(ui.iq);
-  const list=S.ingredientes.filter(i=>(ui.ifam==='Todas'||i.familia===ui.ifam)&&(!ui.iprov||i.proveedor===ui.iprov)&&(!q||norm(i.nombre).includes(q))).sort((a,b)=>{ const pa=q&&norm(a.nombre).startsWith(q)?0:1, pb=q&&norm(b.nombre).startsWith(q)?0:1; return pa-pb||a.nombre.localeCompare(b.nombre,'es'); });
+  const list=S.ingredientes.filter(i=>ingNuevos.has(i.id)||(ui.ifam==='Todas'||i.familia===ui.ifam)&&(!ui.iprov||i.proveedor===ui.iprov)&&(!q||norm(i.nombre).includes(q))).sort((a,b)=>{ const na=ingNuevos.has(a.id)?0:1, nb=ingNuevos.has(b.id)?0:1; const pa=q&&norm(a.nombre).startsWith(q)?0:1, pb=q&&norm(b.nombre).startsWith(q)?0:1; return na-nb||pa-pb||a.nombre.localeCompare(b.nombre,'es'); });
   const sin=S.ingredientes.filter(i=>num(i.precio)==null).length;
   const sinIva=S.ingredientes.filter(i=>num(i.precio)!=null&&num(i.iva)==null).length;
   return `<section class="view">
@@ -922,7 +924,7 @@ function conIvaCell(i,c){ if(!c) return '—'; return num(i.iva)==null? `<span c
 function ingRow(i){
   const c=costeIng(i); const u=usos(i.id);
   const cUds = i.medida==='L'?['ml','L']:['g','kg'];
-  return `<tr data-ing="${i.id}">
+  return `<tr data-ing="${i.id}" class="${ingNuevos.has(i.id)?'upd':''}">
     <td class="name" data-label="Ingrediente"><input type="text" id="in-n-${i.id}" data-k="nombre" value="${esc(i.nombre)}" aria-label="Nombre"></td>
     <td data-label="Se usa en"><select id="in-m-${i.id}" data-k="medida" aria-label="Medida en receta"><option value="kg" ${i.medida==='kg'?'selected':''}>Peso</option><option value="L" ${i.medida==='L'?'selected':''}>Volumen</option><option value="ud" ${i.medida==='ud'?'selected':''}>Unidades</option></select></td>
     <td data-label="Familia"><select id="in-f-${i.id}" data-k="familia" aria-label="Familia">${FAMILIAS.map(f=>`<option ${f===i.familia?'selected':''}>${esc(f)}</option>`).join('')}</select></td>
@@ -1205,7 +1207,7 @@ document.addEventListener('click',e=>{
     case 'borrar-no': $('#del-slot').innerHTML='<button class="btn danger" data-act="borrar-pedir">Eliminar</button>'; break;
     case 'borrar': (r.fotos||[]).forEach(delFoto); fotosBorrar(r.id); S.recetas=S.recetas.filter(x=>x.id!==r.id); S.recetas.forEach(x=>x.lineas.forEach(l=>{ if(l.ref==='r:'+r.id) l.ref='?:'+r.nombre; })); save(); ui.ficha=null; setTab('mis'); toast('Receta eliminada'); break;
     case 'quitar-foto': { const k=+b.dataset.k; const [f]=r.fotos.splice(k,1); delFoto(f); fotosGuardar(r); if(!r.fotos.length) r.mini=''; else miniatura(r.fotos[0]).then(m=>{ r.mini=m; save(); }); save(); render(); recalcFicha(); break; }
-    case 'add-ing': { const ing={id:uid(),nombre:'Nuevo ingrediente',familia:ui.ifam!=='Todas'?ui.ifam:'Otros',medida:'kg',formato:'',proveedor:'',albaran:'',fecha:'',precio:'',iva:'',unidades:'',contenido:'',contenidoUd:'kg',merma:''}; S.ingredientes.push(ing); save(); marcarIng(); ui.iq=''; render(); const el=$(`#in-n-${ing.id}`); el?.focus(); el?.select(); break; }
+    case 'add-ing': { const ing={id:uid(),nombre:'Nuevo ingrediente',familia:ui.ifam!=='Todas'?ui.ifam:'Otros',medida:'kg',formato:'',proveedor:'',albaran:'',fecha:'',precio:'',iva:'',unidades:'',contenido:'',contenidoUd:'kg',merma:''}; S.ingredientes.push(ing); ingNuevos.add(ing.id); save(); marcarIng(); ui.iq=''; render(); const el=$(`#in-n-${ing.id}`); if(el){ el.closest('tr').scrollIntoView({block:'center'}); el.focus(); el.select(); } break; }
     case 'del-ing': { const tr=b.closest('tr'); S.ingredientes=S.ingredientes.filter(x=>x.id!==tr.dataset.ing); save(); marcarIng(); tr.remove(); counts(); toast('Ingrediente eliminado'); break; }
     case 'exportar': { const copy=JSON.parse(JSON.stringify(S)); copy.recetas.forEach(r=>{ r.fotos=(r.fotos||[]).map(fotoSrc).filter(Boolean); }); saveFile(`escandallos-postres-${today()}.json`, JSON.stringify({app:'ehsr-escandallos',v:2,...copy}),'application/json'); break; }
     case 'exportar-ing': saveFile(`precios-ingredientes-${today()}.json`, JSON.stringify({app:'ehsr-escandallos',v:1,ingredientes:S.ingredientes},null,1),'application/json'); break;
@@ -1407,7 +1409,7 @@ async function albAplicar(){
   const ids=[]; let nuevos=0;
   for(const it of sel){
     let ing;
-    if(it.ing==='__new'){ ing={id:uid(),nombre:it.nombreNuevo.trim(),familia:'Otros',medida:'kg',formato:'',proveedor:'',albaran:'',fecha:'',precio:'',iva:'',unidades:'',contenido:'',contenidoUd:'kg',merma:''}; S.ingredientes.push(ing); nuevos++; }
+    if(it.ing==='__new'){ ing={id:uid(),nombre:it.nombreNuevo.trim(),familia:'Otros',medida:'kg',formato:'',proveedor:'',albaran:'',fecha:'',precio:'',iva:'',unidades:'',contenido:'',contenidoUd:'kg',merma:''}; S.ingredientes.push(ing); ingNuevos.add(ing.id); nuevos++; }
     else ing=ingById(it.ing);
     if(!ing||ids.includes(ing.id)) continue;
     ing.precio=+num(it.precio).toFixed(4); if(prov) ing.proveedor=prov; if(numA) ing.albaran=numA; if(fecha) ing.fecha=fecha;

@@ -165,7 +165,7 @@ td input,td select{padding:6px 8px}
 .alg label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:14px;background:var(--surface)}
 .alg input{accent-color:var(--gold)}
 .alg label:has(input:checked){background:var(--gold-soft);border-color:var(--gold);font-weight:600}
-.texts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.texts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .photo{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 .photo img{width:220px;max-width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
 
@@ -379,6 +379,11 @@ footer{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:0 30px;c
   .sh-f .btn{flex:1;justify-content:center}
   .sh-f .grow{display:none}
 }
+.nube{display:flex;gap:10px;align-items:flex-start;background:var(--sunk);border-radius:12px;padding:10px 14px;font-size:14px;line-height:1.45}
+.nube.ok{background:var(--ok-soft);color:var(--ok)}
+.nube.ok b{color:inherit}
+.nube.bad{background:var(--warn-soft);color:var(--warn)}
+.nube .btn{margin-left:6px;vertical-align:middle}
 </style>
 
 <header class="brand">
@@ -474,20 +479,62 @@ function aplicarGuardados(list){
 }
 try{ const raw=localStorage.getItem(KEY_PRECIOS); if(raw){ const d=JSON.parse(raw); aplicarGuardados(d.ingredientes); } }catch(e){}
 snapIng();
-(async()=>{ try{ if(window.claude&&window.claude.use){ dbh=await window.claude.use('db'); if(dbh){ const snap=await dbh.doc('config/precios').get(); if(snap.exists&&!ingDirty){ const d=snap.data(); if(aplicarGuardados(d.ingredientes)){ snapIng(); render(); if(ui.tab==='ficha') recalcFicha(); } } } } }catch(e){} })();
-function okGuardado(msg){
+/* ---------- Datos compartidos para todo el alumnado (Firebase, proyecto reservas-ehsr) ----------
+   Ingredientes, precios y ajustes de la profesora se guardan en el servidor y los recibe todo el alumnado.
+   Las recetas y fotos de cada alumno siguen guardándose solo en su dispositivo. */
+const FB_CFG={apiKey:"AIzaSyBiPf6RjlhdsBwN0S_SATI0e3lDebnzfgA",authDomain:"reservas-ehsr.firebaseapp.com",projectId:"reservas-ehsr",storageBucket:"reservas-ehsr.firebasestorage.app",messagingSenderId:"203020897249",appId:"1:203020897249:web:9ef0645201171a596f60a0"};
+const FB_COL='escandallos-postres', FB_DOC='datos';
+let fbRef=null, fbP=null; const nube={estado:'conectando',act:null,err:''};
+function cargarScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>{ s.remove(); rej(new Error('No se pudo cargar '+src)); }; document.head.appendChild(s); }); }
+function conTiempo(p,ms){ return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]); }
+function fbIniciar(){ if(fbRef) return Promise.resolve(fbRef); if(!fbP) fbP=(async()=>{
+    if(!window.firebase||!firebase.firestore){ await cargarScript('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js'); await cargarScript('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js'); }
+    const app=firebase.apps.length?firebase.app():firebase.initializeApp(FB_CFG); fbRef=firebase.firestore(app).collection(FB_COL).doc(FB_DOC); return fbRef; })().catch(e=>{ fbP=null; throw e; });
+  return fbP; }
+function errNube(e){ const m=String((e&&(e.code||e.message))||e); return /permission|insufficient/i.test(m)?'denegado':'offline'; }
+function cfgCompartida(){ const st=S.settings; return {iva:st.iva,objetivo:st.objetivo,categorias:(st.categorias||[]).slice(),verPvp:st.verPvp!==false,verProveedor:st.verProveedor!==false,verEjemplos:st.verEjemplos!==false}; }
+function aplicarNube(d){
+  if(!d) return; let cambio=false;
+  if(d.settings&&typeof d.settings==='object'){ for(const k of ['iva','objetivo','categorias','verPvp','verProveedor','verEjemplos']) if(d.settings[k]!==undefined&&d.settings[k]!==null) S.settings[k]=d.settings[k]; guardarCfgLocal(); cambio=true; }
+  if(Array.isArray(d.ingredientes)&&d.ingredientes.length&&!ingDirty){ if(aplicarGuardados(d.ingredientes)){ snapIng(); try{ localStorage.setItem(KEY_PRECIOS,JSON.stringify({ingredientes:d.ingredientes,guardado:d.actualizado||''})); }catch(e){} cambio=true; } }
+  if(d.actualizado) nube.act=d.actualizado;
+  if(cambio&&typeof render==='function'){ render(); if(ui.tab==='ficha') recalcFicha(); }
+}
+async function nubeLeer(){
+  try{ const ref=await conTiempo(fbIniciar(),15000); const snap=await conTiempo(ref.get(),15000); nube.estado='ok'; if(snap.exists) aplicarNube(snap.data()); }
+  catch(e){ nube.estado=errNube(e); nube.err=String(e&&e.message||e);
+    try{ if(window.claude&&window.claude.use){ dbh=await window.claude.use('db'); if(dbh){ const snap=await dbh.doc('config/precios').get(); nube.estado='ok'; if(snap.exists) aplicarNube(snap.data()); } } }catch(e2){} }
+  if(ui.tab==='ajustes') render();
+}
+async function nubeGuardar(parcial){
+  const data=JSON.parse(JSON.stringify({...parcial,actualizado:new Date().toISOString()}));
+  try{ const ref=await conTiempo(fbIniciar(),15000); await conTiempo(ref.set(data,{merge:true}),15000); nube.estado='ok'; nube.act=data.actualizado; return true; }
+  catch(e){ nube.estado=errNube(e); nube.err=String(e&&e.message||e);
+    if(dbh){ try{ await dbh.doc('config/precios').set({ingredientes:JSON.parse(JSON.stringify(S.ingredientes)),settings:cfgCompartida(),actualizado:data.actualizado}); nube.estado='ok'; nube.act=data.actualizado; return true; }catch(e2){} }
+    return false; }
+}
+function nubeAviso(){
+  const f=nube.act?new Date(nube.act).toLocaleString('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+  if(nube.estado==='ok') return `<div class="nube ok">☁️ <span><b>Conectada.</b> Lo que cambies en Ajustes e Ingredientes se aplica a <b>todo el alumnado</b>.${f?' Última actualización: '+esc(f)+'.':''}</span></div>`;
+  if(nube.estado==='conectando') return `<div class="nube">⏳ <span>Conectando con el servidor…</span></div>`;
+  if(nube.estado==='denegado') return `<div class="nube bad">⚠️ <span><b>El servidor no permite guardar</b> (permisos de Firebase). De momento los cambios se quedan solo en este dispositivo. <button class="btn small" data-act="reconectar">Reintentar</button></span></div>`;
+  return `<div class="nube bad">⚠️ <span><b>Sin conexión con el servidor.</b> Los cambios se guardan solo en este dispositivo; vuelve a guardarlos cuando tengas internet. <button class="btn small" data-act="reconectar">Reintentar</button></span></div>`;
+}
+function okGuardado(msg,sub,icono){
   if(!msg){ toast('No se ha podido guardar en este navegador'); return; }
   const bg=document.createElement('div'); bg.className='modal-bg';
-  bg.innerHTML=`<div class="modal" role="alertdialog" style="text-align:center"><div style="font-size:42px;line-height:1">✅</div><h3>${esc(msg)}</h3><div class="sub">Los precios y nombres de ingredientes quedan guardados de forma permanente.</div><button class="btn primary" id="ok-close" style="justify-content:center">Aceptar</button></div>`;
+  bg.innerHTML=`<div class="modal" role="alertdialog" style="text-align:center"><div style="font-size:42px;line-height:1">${icono||'✅'}</div><h3>${esc(msg)}</h3><div class="sub">${esc(sub||'')}</div><button class="btn primary" id="ok-close" style="justify-content:center">Aceptar</button></div>`;
   document.body.appendChild(bg); const c=()=>bg.remove(); bg.querySelector('#ok-close').onclick=c; bg.addEventListener('click',e=>{ if(e.target===bg) c(); }); bg.querySelector('#ok-close').focus();
 }
 async function guardarPrecios(){
   const data={ingredientes:JSON.parse(JSON.stringify(S.ingredientes)),guardado:new Date().toISOString()};
   let local=false, compartido=false;
   try{ localStorage.setItem(KEY_PRECIOS,JSON.stringify(data)); local=true; }catch(e){}
-  if(dbh){ try{ await dbh.doc('config/precios').set(data); compartido=true; }catch(e){} }
+  toast('Guardando para todo el alumnado…');
+  compartido=await nubeGuardar({ingredientes:data.ingredientes,settings:cfgCompartida()});
   if(compartido||local){ ingDirty=false; nCambios=0; snapIng(); if(ui.tab==='ajustes'||ui.tab==='ingredientes') render(); }
-  okGuardado(compartido? 'Cambios guardados para todos los usuarios' : local? 'Cambios guardados en este dispositivo' : null);
+  if(compartido) okGuardado('Guardado para todo el alumnado','Los alumnos verán los nuevos precios y nombres la próxima vez que abran la app.');
+  else okGuardado(local?'Guardado solo en este dispositivo':null, nube.estado==='denegado'?'El servidor no ha permitido guardar (permisos de Firebase). Los alumnos todavía no ven estos cambios.':'No hay conexión con el servidor. Cuando tengas internet, vuelve a pulsar «Guardar cambios» para que lo vean los alumnos.','⚠️');
 }
 function pedirPin(onOk,titulo){
   const bg=document.createElement('div'); bg.className='modal-bg';
@@ -517,7 +564,9 @@ function guardarRecetas(){
 }
 function save(){ hayCambios=true; clearTimeout(saveRecT); saveRecT=setTimeout(guardarRecetas,400); }
 const KEY_CFG='ehsr-escandallos-config-v1';
-function guardarCfg(){ try{ const st=S.settings; localStorage.setItem(KEY_CFG,JSON.stringify({iva:st.iva,objetivo:st.objetivo,categorias:st.categorias,verPvp:st.verPvp,verProveedor:st.verProveedor,verEjemplos:st.verEjemplos})); }catch(e){} }
+function guardarCfgLocal(){ try{ localStorage.setItem(KEY_CFG,JSON.stringify(cfgCompartida())); }catch(e){} }
+let cfgT=null;
+function guardarCfg(){ guardarCfgLocal(); if(!desbloqueado) return; clearTimeout(cfgT); cfgT=setTimeout(async()=>{ const ok=await nubeGuardar({settings:cfgCompartida()}); toast(ok?'Guardado para todo el alumnado':'Sin conexión: guardado solo en este dispositivo'); if(ui.tab==='ajustes'){ const n=document.getElementById('nube-slot'); if(n) n.innerHTML=nubeAviso(); } },900); }
 function cargarCfg(){ try{ const d=JSON.parse(localStorage.getItem(KEY_CFG)||'null'); if(d) Object.assign(S.settings,Object.fromEntries(Object.entries(d).filter(([k,v])=>v!==undefined&&v!==null&&v!==''))); }catch(e){} }
 function cargarRecetas(){
   let d=null; try{ d=JSON.parse(localStorage.getItem(KEY_REC)||'null'); }catch(e){}
@@ -724,11 +773,12 @@ function vFicha(r){
         <datalist id="dl-ings">${refOptions(r.id)}</datalist>
         <div class="bar"><button class="btn" data-act="add-linea">+ Añadir ingrediente</button><span class="sub">Escribe y elige de la lista. Los costes de los ingredientes llevan el IVA de compra incluido.</span></div>
       </div>
-      <div class="panel"><h3>Elaboración, presentación y equipo</h3>
+      <div class="panel"><h3>Elaboración, presentación, equipo y observaciones</h3>
         <div class="texts">
           <label class="f"><span>Elaboración</span><textarea id="f-elab" data-f="elaboracion" rows="7" placeholder="Pasos: mezclar, montar, hornear, enfriar…">${esc(r.elaboracion)}</textarea></label>
           <label class="f"><span>Presentación / emplatado</span><textarea id="f-pres" data-f="presentacion" rows="7">${esc(r.presentacion)}</textarea></label>
           <label class="f"><span>Equipo necesario (mise en place)</span><textarea id="f-equipo" data-f="equipo" rows="7">${esc(r.equipo)}</textarea></label>
+          <label class="f"><span>Observaciones</span><textarea id="f-obs" data-f="observaciones" rows="7" placeholder="Puntos críticos, conservación, variantes, consejos…">${esc(r.observaciones||'')}</textarea></label>
         </div>
       </div>
       <div class="panel"><h3>Alérgenos</h3>
@@ -823,7 +873,7 @@ function vIngredientes(){
   <div class="bar"><div class="grow"><h2 class="h-sec">Ingredientes y precios</h2><div class="sub">Precios reales de nuestros proveedores, con IVA, que usan todos los escandallos.</div></div>
     ${desbloqueado?'<button class="btn primary" data-act="add-ing">+ Añadir ingrediente</button>':''}</div>
   ${desbloqueado
-    ? '<div class="lockbar on"><span>🔓 <b>Modo edición de la profesora.</b> Puedes añadir y modificar ingredientes.</span><button class="btn small" data-act="bloquear">Bloquear</button></div>'
+    ? '<div class="lockbar on"><span>🔓 <b>Modo edición de la profesora.</b> Puedes añadir y modificar ingredientes. Al pulsar «Guardar cambios» se actualizan para todo el alumnado.</span><button class="btn small" data-act="bloquear">Bloquear</button></div>'
     : '<div class="lockbar"><span>🔒 <b>Solo consulta.</b> Únicamente la profesora puede añadir o modificar ingredientes.</span><button class="btn small" data-act="desbloquear-ing">Editar (profesora)</button></div>'}
   ${desbloqueado?albPanel():''}
   ${desbloqueado?`<div class="tip"><b>Cómo se rellena:</b> copia del albarán el <b>precio sin IVA</b> y el <b>tipo de IVA</b>; la app calcula el precio con IVA y el coste por kg, litro o unidad que usan los escandallos (todos los costes de las recetas llevan el IVA incluido). Ejemplo real: harina Brisa a 1,15 €/kg + 4 % de IVA = 1,20 €/kg; azúcar en saco de 25 kg a 20,69 € + 10 % = 22,76 € → 0,91 €/kg. ${PRECIOS_CENTRO.items.length?`Precios cargados: <b>albaranes del curso ${esc(PRECIOS_CENTRO.curso)}</b>.`:''}</div>`:''}
@@ -899,8 +949,9 @@ function vAjustes(){
   const sw=(k,t,d)=>`<label class="sw"><input type="checkbox" data-cfg="${k}" ${st[k]!==false?'checked':''}><span class="sw-ui" aria-hidden="true"></span><span><b>${t}</b><small>${d}</small></span></label>`;
   const editados=S.ingredientes.length!==PRECIOS_CENTRO.items.length || !!(()=>{try{return localStorage.getItem(KEY_PRECIOS)}catch(e){return null}})();
   return `<section class="view">
-  <div class="bar"><div class="grow"><h2 class="h-sec">Ajustes de la profesora</h2><div class="sub">Los cambios de esta página se guardan automáticamente en este dispositivo.</div></div>
+  <div class="bar"><div class="grow"><h2 class="h-sec">Ajustes de la profesora</h2><div class="sub">Los cambios de esta página se guardan solos y se aplican a todo el alumnado.</div></div>
     <button class="btn" data-act="bloquear-aj">🔒 Bloquear y salir</button></div>
+  <div id="nube-slot">${nubeAviso()}</div>
   ${ingDirty?'<div class="notice">Hay cambios en «Ingredientes y precios» sin guardar. <button class="linkbtn" data-act="guardar">Guardar ahora</button></div>':''}
   <div class="two">
     <div style="display:grid;gap:18px">
@@ -1015,7 +1066,7 @@ async function pdfReceta(r){
     const lines=doc.splitTextToSize(T(text&&String(text).trim()?text:'—'),CW);
     for(const ln of lines){ need(5); doc.text(ln,M,y); y+=4.4; } y+=3;
   };
-  section('Elaboración',r.elaboracion); section('Presentación',r.presentacion); section('Equipo necesario',r.equipo);
+  section('Elaboración',r.elaboracion); section('Presentación',r.presentacion); section('Equipo necesario',r.equipo); section('Observaciones',r.observaciones);
   // Alérgenos
   need(18); doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...GOLDINK); doc.text(T('ALÉRGENOS'),M,y); doc.line(M,y+1.6,W-M,y+1.6); y+=6;
   let ax=M; doc.setFontSize(8);
@@ -1052,7 +1103,7 @@ async function pdfReceta(r){
 }
 /* ---------- Acciones ---------- */
 function nuevaReceta(){
-  const r={id:uid(),nombre:'',categoria:'',alumno:S.settings.alumno||'',fecha:today(),porcionTam:'',porciones:'',rendimiento:'',tPrep:'',tCoc:'',tempServ:'',pvp:'',iva:S.settings.iva,lineas:[{ref:'',cant:'',ud:'g'}],elaboracion:'',presentacion:'',equipo:'',alergenos:[],fotos:[]};
+  const r={id:uid(),nombre:'',categoria:'',alumno:S.settings.alumno||'',fecha:today(),porcionTam:'',porciones:'',rendimiento:'',tPrep:'',tCoc:'',tempServ:'',pvp:'',iva:S.settings.iva,lineas:[{ref:'',cant:'',ud:'g'}],elaboracion:'',presentacion:'',equipo:'',observaciones:'',alergenos:[],fotos:[]};
   S.recetas.push(r); save(); abrir(r.id); setTimeout(()=>$('#f-nombre')?.focus(),50);
 }
 function abrir(id){ ui.ficha=id; ui.escala=''; setTab('ficha'); recalcFicha(); }
@@ -1127,16 +1178,17 @@ document.addEventListener('click',e=>{
       const f=v=>{ const x=String(v??''); return /[;"\n]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x; }; const n=v=>v==null||v===''?'':String(v).replace('.',',');
       const rows=S.ingredientes.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).map(i=>{ const c=costeIng(i); return [i.nombre,i.familia,i.proveedor,i.albaran,i.fecha,i.formato,n(i.precio),n(i.iva),c?n(c.conIva.toFixed(2)):'',n(i.unidades),n(i.contenido),i.contenidoUd,{kg:'peso',L:'volumen',ud:'unidades'}[i.medida],c?n(c.neto.toFixed(4)):'',c?c.base:'']; });
       saveFile('Precios ingredientes - Escandallos San Roque.csv','\ufeff'+[cab,...rows].map(r=>r.map(f).join(';')).join('\r\n'),'text/csv'); break; }
-    case 'rest-pedir': $('#rest-slot').innerHTML='<span class="confirm">¿Seguro? Se pierden los cambios de precios de este dispositivo. <button class="btn small danger" data-act="rest-si">Sí, volver</button><button class="btn small ghost" data-act="rest-no">No</button></span>'; break;
+    case 'rest-pedir': $('#rest-slot').innerHTML='<span class="confirm">¿Seguro? Se pierden los cambios de precios para todo el alumnado. <button class="btn small danger" data-act="rest-si">Sí, volver</button><button class="btn small ghost" data-act="rest-no">No</button></span>'; break;
     case 'rest-no': render(); break;
     case 'rest-si': { try{ localStorage.removeItem(KEY_PRECIOS); }catch(e){} const usados=new Set(S.recetas.flatMap(r=>r.lineas.map(l=>l.ref))); const extra=S.ingredientes.filter(i=>!String(i.id).match(/^c\d+$/)&&usados.has('i:'+i.id));
-      S.ingredientes=PRECIOS_CENTRO.items.map((x,k)=>({id:'c'+k,...x})).concat(extra); ingDirty=false; nCambios=0; snapIng(); if(dbh){ dbh.doc('config/precios').delete().catch(()=>{}); } render(); toast('Precios de los albaranes restablecidos'); break; }
+      S.ingredientes=PRECIOS_CENTRO.items.map((x,k)=>({id:'c'+k,...x})).concat(extra); ingDirty=false; nCambios=0; snapIng(); render(); nubeGuardar({ingredientes:JSON.parse(JSON.stringify(S.ingredientes)),settings:cfgCompartida()}).then(ok=>{ toast(ok?'Precios de los albaranes restablecidos para todo el alumnado':'Restablecidos solo en este dispositivo (sin conexión)'); if(ui.tab==='ajustes') render(); }); break; }
     case 'desbloquear-ing': pedirPin(()=>{ render(); toast('Modo edición activado'); },'Editar ingredientes'); break;
     case 'bloquear': if(ingDirty){ toast('Guarda o descarta los cambios antes de bloquear'); break; } desbloqueado=false; render(); toast('Edición bloqueada'); break;
     case 'guardar': if(desbloqueado) guardarPrecios(); break;
     case 'guardar-ing': if(desbloqueado) guardarPrecios(); else pedirPin(()=>guardarPrecios(),'Confirmar y guardar cambios'); break;
     case 'descartar': { const bg=document.createElement('div'); bg.className='modal-bg'; bg.innerHTML=`<div class="modal"><h3>¿Descartar los cambios?</h3><div class="sub">Se recuperan los precios y nombres guardados por última vez.</div><div class="bar"><button class="btn ghost" id="d-no">Cancelar</button><span class="grow"></span><button class="btn danger" id="d-si">Sí, descartar</button></div></div>`; document.body.appendChild(bg);
       bg.querySelector('#d-no').onclick=()=>bg.remove(); bg.querySelector('#d-si').onclick=()=>{ S.ingredientes=JSON.parse(ingSnap); ingDirty=false; nCambios=0; bg.remove(); render(); toast('Cambios descartados'); }; break; }
+    case 'reconectar': nube.estado='conectando'; render(); nubeLeer(); break;
     case 'ver-alb': { const a=albHist.find(x=>x.id===b.dataset.id); if(a) verFoto(a.foto,a.id); break; }
     case 'ir-ajustes': setTab('ajustes'); if(!desbloqueado) pedirPin(()=>render()); break;
     case 'volver': { const rr=recById(ui.ficha); ui.ficha=null; setTab(rr&&rr.ejemplo?'recetario':'mis'); break; }
@@ -1177,7 +1229,7 @@ document.addEventListener('input',e=>{
     else if(t.dataset.ln==='ud'){ l.ud=t.value; save(); recalcFicha(); }
     return; }
   if(t.dataset.s){ const k=t.dataset.s; S.settings[k]= (k==='iva'||k==='objetivo')? (num(t.value)??'') : t.value; save(); if(k==='iva'||k==='objetivo') guardarCfg(); return; }
-  if(t.dataset.cfg){ S.settings[t.dataset.cfg]=t.checked; guardarCfg(); toast('Guardado'); return; }
+  if(t.dataset.cfg){ S.settings[t.dataset.cfg]=t.checked; guardarCfg(); return; }
   if(t.id==='s-cats'){ S.settings.categorias=t.value.split('\n').map(x=>x.trim()).filter(Boolean); save(); guardarCfg(); return; }
   const tr=t.closest('tr[data-ing]');
   if(tr&&t.dataset.k){ if(!desbloqueado) return; const ing=ingById(tr.dataset.ing); ing[t.dataset.k]=t.value; save(); marcarIng();
@@ -1391,6 +1443,7 @@ function importar(data,mode){
 
 try{ cargarCfg(); cargarRecetas(); }catch(e){ console.error(e); }
 fotosCargar();
+nubeLeer();
 albCargarHist().then(()=>{ if(ui.tab==='ingredientes'&&desbloqueado&&albHist.length) render(); });
 setTab(ui.tab);
 })();

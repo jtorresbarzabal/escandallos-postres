@@ -400,7 +400,6 @@ footer{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:0 30px;c
   <div class="tabs-wrap"><div class="tabs-in" role="tablist">
     <button class="tab" role="tab" data-tab="recetario" id="t-recetario">Inicio</button>
     <button class="tab" role="tab" data-tab="mis" id="t-mis">Mis recetas<span class="count" id="c-mis"></span></button>
-    <button class="tab" role="tab" data-tab="ficha" id="t-ficha" hidden>Ficha técnica</button>
     <button class="tab" role="tab" data-tab="ingredientes" id="t-ingredientes">Ingredientes<span class="lg"> y precios</span><span class="count" id="c-ing"></span></button>
     <button class="tab" role="tab" data-tab="ajustes" id="t-ajustes" aria-label="Ajustes"><span class="sm" aria-hidden="true">⚙︎</span><span class="lg">Ajustes</span></button>
   </div>
@@ -656,8 +655,8 @@ function usos(ingId){ return S.recetas.filter(r=>r.lineas.some(l=>l.ref==='i:'+i
 /* ---------- Navegación ---------- */
 function setTab(t){
   ui.tab=t;
-  $('#t-ficha').hidden = !ui.ficha;
-  $$('.tab').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===t)));
+  const vis = t==='ficha' ? ((recById(ui.ficha)||{}).ejemplo?'recetario':'mis') : t;
+  $$('.tab').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===vis)));
   render(); window.scrollTo({top:0});
 }
 $('.tabs-in').addEventListener('click',e=>{ const b=e.target.closest('.tab'); if(!b) return; if(b.dataset.tab==='ajustes'&&!desbloqueado){ setTab('ajustes'); pedirPin(()=>render()); return; } setTab(b.dataset.tab); });
